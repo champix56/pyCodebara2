@@ -107,7 +107,7 @@ class AsyncHTTPServer:
 
     async def handle_with_body(self, request: web.Request) -> web.Response:
         body = await request.read()
-        returnedError:HttpOutputResponse=HttpOutputResponse() #'{"status":200, "ok":true}'
+        returnedError:web.Response=web.Response(status=404) #'{"status":200, "ok":true}'
         self.logger.info(
             "%s %s | from %s | %s | body_size=%d",
             request.method,
@@ -124,19 +124,11 @@ class AsyncHTTPServer:
 
         queryArray=self.getQueryValue(request=request)
 
-        match request.method:
-            case 'POST':
-                returnedError= await routes.post(request= request,body=body,queryArray=queryArray)
-            case 'PUT':
-                returnedError=await routes.put(request=request,body=body,queryArray=queryArray)
-            case 'PATCH':
-                returnedError=await routes.patch(request=request,body=body,queryArray=queryArray)
-            case 'DELETE':
-                returnedError=await routes.delete(request=request,body=body,queryArray=queryArray)
+        returnedError=bodyRoute(request=request,body=body,queryArray=queryArray)
         self.logger.info("end %s", request.method)
         #self.logger.info(returnedError)
         #return web.Response(text=returnedError.toJson(), status=returnedError.status)
-        return returnedError.toResponse()
+        return returnedError
     # ======================================================
     # APP FACTORY
     # ======================================================
