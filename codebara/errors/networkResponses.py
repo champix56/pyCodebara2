@@ -70,6 +70,7 @@ def assembleHttpRequestError(error:HttpErrors,request: web.Request,message:str|N
         retval.message+=";"+message
     return retval
 
+"""
 def assembleHttpRequest(body:object,status:HttpErrors=HttpErrors.OK)->HttpOutputResponse:
     retval= HttpOutputResponse()
     retval.body=body
@@ -77,4 +78,4 @@ def assembleHttpRequest(body:object,status:HttpErrors=HttpErrors.OK)->HttpOutput
     retval.status=status.value
     retval.ok= True if status.value < 400 else False
     retval.message=None
-    return retval
+    return retval"""
