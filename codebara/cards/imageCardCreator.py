@@ -1,6 +1,6 @@
-import json
-import random
 
+import random
+from codebara.seasons.season import seasonLoader
 from PIL import Image, ImageDraw, ImageFont
 
 from codebara.cards.card import CardSpecs, SpecialSpec
@@ -70,7 +70,7 @@ class CardImageCreator:
         else:
             self.specs = specs"""
         if season is None:
-            self.season = self._loadSeason()
+            self.season = seasonLoader()
         else:
             self.season = season
         self.seasonId = self.season["seasonid"]
@@ -144,12 +144,6 @@ class CardImageCreator:
         )
         self.outLoc = "/" + str(self.id)
 
-    def _loadSeason(self, location="./season/season.json") -> dict:
-        with open(location, "r") as jsonfile:
-            data = json.load(jsonfile)
-            print(type(data))
-            print((data))
-            return data
     def _resizeAndSave(self,)->str:
         self.tmpImage.thumbnail((1185,2048), Image.Resampling.LANCZOS)
         #self.tmpImage=self.tmpImage.convert('RGB')
