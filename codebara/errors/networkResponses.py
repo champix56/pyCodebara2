@@ -5,9 +5,10 @@ from io import StringIO
 
 class ResponseStatus(Enum):
     OK=200
-    INTERNAL_SERVER_ERROR=500
-    NOT_FOUND=404
-    BAD_REQUEST=400
+    Internal_Server_Error=500
+    Not_Found=404
+    Bad_Request=400
+    Method_Not_Allowed=405
 class HttpErrors(Enum):
     OK=0
     ERROR_SERVER=1
@@ -15,14 +16,12 @@ class HttpErrors(Enum):
     ERROR_INVALID_METHOD=3
     ERROR_INVALID_ROUTE=4
 
-class HttpOutputResponse():
-    """def __init__(data):
-        print("error init")
-        print(data)"""
-    def __init__(self):
-        self.statusText = 'INTERNAL SERVER ERROR'
-        self.status = 500
-        self.ok=False
+class  HttpOutputResponse():
+    def __init__(self,responseStatus:ResponseStatus|None=None, body:dict|None=None,message:str|None=None):
+        respStatus=responseStatus if responseStatus is not None else ResponseStatus.Internal_Server_Error
+        self.statusText = respStatus.name
+        self.status = respStatus.value
+        self.ok=False if respStatus.value>=400 else True
     def toJson(self)->str:
         tmpDict={
             "statusText":self.statusText,
@@ -45,21 +44,21 @@ class HttpOutputResponse():
         message:str|None=None if self.body is not None else json.dumps({"message":self.message})
         return web.Response( status=self.status, body=self.body, text=message   , headers=())
         
-def assembleHttpRequestError(error:HttpErrors,request: web.Request,message:str|None=None)->HttpOutputResponse:
+def assembleHttpRequestError(error:HttpErrors,request: web.Request, message:str|None=None)->HttpOutputResponse:
     retval= HttpOutputResponse()
     status:ResponseStatus|None=None
     requestPathAndMethod="method: "+request.method+" on route:"+request.path
     if error == HttpErrors.ERROR_INVALID_ROUTE or error.value == HttpErrors.ERROR_INVALID_METHOD:
-        status=ResponseStatus.NOT_FOUND
+        status=ResponseStatus.Not_Found
         retval.body=None
         retval.message="Invalid Path/Method for: "+requestPathAndMethod
     elif error == HttpErrors.ERROR_REQUEST:
-        status=ResponseStatus.BAD_REQUEST
+        status=ResponseStatus.Bad_Request
         retval.message="Invalid Request with body given for: "+requestPathAndMethod
         retval.body=None
     # elif error == HttpErrors.ERROR_SERVER:
     else:
-        status=ResponseStatus.NOT_FOUND
+        status=ResponseStatus.Not_Found
         retval.message="Invalid Response issue with body given for: "+requestPathAndMethod
         retval.body=None
     text:str=status.name
