@@ -1,69 +1,109 @@
 {
-  "seasonid": 0,
-  "startTime": "2025-01-01T00:00:01",
-  "deck":{
-      "frontUrl": "season/standard/front.png",
-      "backUrl": "season/standard/back.png",
-      "width": 2370,
-      "height": 4096,
-      "positions": [
-        { "type": "name", "x": 100, "y": 160, "height": 180 },
-        { "type": "health", "x": 630, "y": 2570, "height": 93 },
-        {
-          "type": "healthbar",
-          "x": 860,
-          "y": 2560,
-          "height": 70,
-          "width": 1300
-        },
-        { "type": "attack", "x": 630, "y": 2770, "height": 93 },
-        {
-          "type": "attackbar",
-          "x": 860,
-          "y": 2760,
-          "height": 70,
-          "width": 1300
-        },
-        { "type": "special", "x": 170, "y": 3230 },
-        { "type": "image", "x": 108, "y": 367, "width": 2151, "height": 1981 },
-        { "type": "id", "x": 108, "y": 4090, "height": 60 }
-      ]
-    },
-  "promptBase":"style cartoon; fun; traits simples",
-  "barcodeData": [
-    {
-      "positionIndexReference": 348,
-      "type": "prompt",
-      "name":"personnage",
-      "z-index":0,
-      "_max":8,
-      "values": [
-        {
-          "id": 0,
-          "value": "elephant rigolo"
-        },
-        {
-          "id": 1,
-          "value": "aligator rigolo"
+    "seasonid": 0,
+    "seasonName":"beta",
+    "startTime": "2025-01-01T00:00:01",
+    "ressourcesFolder":"beta",
+    "deck": {
+        "frontUrl": "./standard/front.png",
+        "backUrl": "./standard/back.png",
+        "width": 2370,
+        "height": 4096,
+        "positions": {
+            "name": {
+                "x": 100,
+                "y": 160,
+                "height": 180,
+                "color":"#0F0FAB"
+            },
+            "health": {
+                "x": 630,
+                "y": 2590,
+                "height": 93,
+                "color":"#0F0FAB"
+
+            },
+            "healthbar": {
+                "x": 860,
+                "y": 2580,
+                "height": 100,
+                "width": 1300,
+                "color":"#0F0FAB"
+
+            },
+            "attack": {
+                "x": 630,
+                "y": 2790,
+                "height": 93,
+                "color":"#0F0FAB"
+
+            },
+            "attackbar": {
+                "x": 860,
+                "y": 2780,
+                "height": 100,
+                "width": 1300,
+                "color":"#0F0FAB"
+
+            },
+            "special": {
+                "x": 170,
+                "y": 3150,
+                "height":100,
+                "color":"#0F0FAB"
+
+            },
+            "image": {
+                "x": 108,
+                "y": 367,
+                "width": 2151,
+                "height": 1981,
+                "color":"#0F0FAB"
+
+            },
+            "id": {
+                "x": 50,
+                "y": 3996,
+                "height": 70,
+                "color":"#FAFAFAFA"
+
+            }
         }
-      ]
     },
-    {
-      "positionIndexReference": 348,
-      "type": "prompt",
-      "name":"personnage",
-      "z-index":0,
-      "_max":8,
-      "values": [
+    "promptBase": "style cartoon; fun; traits simples",
+    "barcodeData": [
         {
-          "id": 0,
-          "value": "elephant rigolo"
+            "positionIndexReference": 348,
+            "type": "prompt",
+            "name": "personnage",
+            "z-index": 0,
+            "_max": 8,
+            "values": [
+                {
+                    "id": 0,
+                    "value": "elephant rigolo"
+                },
+                {
+                    "id": 1,
+                    "value": "aligator rigolo"
+                }
+            ]
         },
         {
-          "id": 1,
-          "value": "aligator rigolo"
+            "positionIndexReference": 348,
+            "type": "prompt",
+            "name": "personnage",
+            "z-index": 0,
+            "_max": 8,
+            "values": [
+                {
+                    "id": 0,
+                    "value": "elephant rigolo"
+                },
+                {
+                    "id": 1,
+                    "value": "aligator rigolo"
+                }
+            ]
         }
-      ]
-    }
-  ]
+    ]
 }
