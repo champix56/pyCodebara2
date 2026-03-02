@@ -1,3 +1,3 @@
-from .routes import delete,get, patch, post, put
+from .routes import bodyRoute, noBodyRoute
 
-__all__=["delete","post", "put", "patch", "get"]
+__all__=["bodyRoute", "noBodyRoute"]
