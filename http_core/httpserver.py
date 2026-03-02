@@ -8,8 +8,8 @@ import sys
 from typing import Optional
 
 
-from codebara import routes  
-from codebara.errors import HttpOutputResponse
+from codebara import bodyRoute, noBodyRoute  
+#from codebara.errors import HttpOutputResponse
 
 from aiohttp_middlewares import cors_middleware
 from aiohttp_middlewares.cors import DEFAULT_ALLOW_HEADERS
@@ -101,7 +101,9 @@ class AsyncHTTPServer:
         )
         for k, v in request.headers.items():
             self.logger.debug("HEADER %s=%s", k, v)
-        await routes.get(request,self.getQueryValue(request=request))
+        #await routes.get(request,self.getQueryValue(request=request))
+        #resp=
+        await noBodyRoute(request=request,queryArray=self.getQueryValue(request=request))
         self.logger.info("end %s", request.method)
         return web.Response(text="OK")
 
@@ -124,7 +126,7 @@ class AsyncHTTPServer:
 
         queryArray=self.getQueryValue(request=request)
 
-        returnedError=bodyRoute(request=request,body=body,queryArray=queryArray)
+        returnedError=await bodyRoute(request=request,body=body,queryArray=queryArray)
         self.logger.info("end %s", request.method)
         #self.logger.info(returnedError)
         #return web.Response(text=returnedError.toJson(), status=returnedError.status)
