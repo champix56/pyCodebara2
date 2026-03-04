@@ -20,7 +20,7 @@ class MySQLClient:
         host: str = DB_HOST,
         user: str = "champix",
         password: str = "alex",
-        database: str = "codebara",
+        database: str = "cdb",
         port: int = DB_PORT,
         minsize: int = 1,
         maxsize: int = 10
