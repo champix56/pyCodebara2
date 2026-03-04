@@ -4,8 +4,8 @@ from codebara.seasons.season import seasonLoader
 from PIL import Image, ImageDraw, ImageFont
 
 from codebara.cards.card import CardSpecs, SpecialSpec
-from codebara.cards.cardgen import CardGenerator
-
+#from codebara.cards.cardgen import CardGenerator
+from codebara.tools.common import seededRandom
 DEBUG=True
 class Location2D:
     x: int
@@ -62,7 +62,7 @@ class CardImageCreator:
         self.id = int(
             random.random()
             * 100000
-            * CardGenerator.seededRandom(1000, int(random.random() * 1000))
+            * seededRandom(1000, int(random.random() * 1000))
         )
         self.creatorid = uid
         """if specs is None:
@@ -151,11 +151,11 @@ class CardImageCreator:
         self.tmpImage.save(outputFileName, "PNG",quality=1)
         print(outputFileName)
         return outputFileName
-    def create(self, specs: CardSpecs, centralImageLoc:str|None)->str:
+    def create(self, specs: CardSpecs, centralImageLoc:str)->str:
         self.outputFormat=format
         self.specs = specs
         self._createEmptyBase("./season/standard/front.png")
-        self._addPerso(loc=(centralImageLoc if DEBUG is not True and centralImageLoc is not None else "./season/beta/2.png"))
+        self._addPerso(loc=centralImageLoc)# if DEBUG is True and centralImageLoc is not None else "./season/beta/2.png")
         self._addName()
         self._addAttack()
         self._addHealth()
