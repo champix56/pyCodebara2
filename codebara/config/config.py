@@ -1,5 +1,5 @@
 IMAGE_IA_GEN_REST_URL="0.0.0.0:8000"
-IMAGE_IA_GEN_ENDPOINT_GEN="/api/gen"
+IMAGE_IA_GEN_ENDPOINT_GEN="/api/generate"
 IMAGE_IA_GEN_ENDPOINT_METHOD="POST"
 IMAGE_IA_GEN_BODY_BASE={
   "lcm_model_id": "stabilityai/sd-turbo",
