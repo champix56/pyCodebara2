@@ -1,11 +1,11 @@
 {
     "seasonid": 0,
-    "seasonName":"beta",
+    "seasonName": "beta",
     "startTime": "2025-01-01T00:00:01",
-    "ressourcesFolder":"beta",
+    "ressourcesFolder": "/season/beta",
     "deck": {
-        "frontUrl": "./standard/front.png",
-        "backUrl": "./standard/back.png",
+        "frontUrl": "/season/standard/front.png",
+        "backUrl": "/season/standard/back.png",
         "width": 2370,
         "height": 4096,
         "positions": {
@@ -13,97 +13,212 @@
                 "x": 100,
                 "y": 160,
                 "height": 180,
-                "color":"#0F0FAB"
+                "color": "#0F0FAB"
             },
             "health": {
                 "x": 630,
                 "y": 2590,
                 "height": 93,
-                "color":"#0F0FAB"
-
+                "color": "#0F0FAB"
             },
             "healthbar": {
                 "x": 860,
                 "y": 2580,
                 "height": 100,
                 "width": 1300,
-                "color":"#0F0FAB"
-
+                "color": "#0F0FAB"
             },
             "attack": {
                 "x": 630,
                 "y": 2790,
                 "height": 93,
-                "color":"#0F0FAB"
-
+                "color": "#0F0FAB"
             },
             "attackbar": {
                 "x": 860,
                 "y": 2780,
                 "height": 100,
                 "width": 1300,
-                "color":"#0F0FAB"
-
+                "color": "#0F0FAB"
             },
             "special": {
                 "x": 170,
                 "y": 3150,
-                "height":100,
-                "color":"#0F0FAB"
-
+                "height": 100,
+                "color": "#0F0FAB"
             },
             "image": {
                 "x": 108,
                 "y": 367,
                 "width": 2151,
                 "height": 1981,
-                "color":"#0F0FAB"
-
+                "color": "#0F0FAB"
             },
             "id": {
                 "x": 50,
                 "y": 3996,
                 "height": 70,
-                "color":"#FAFAFAFA"
-
+                "color": "#FAFAFAFA"
             }
         }
     },
     "promptBase": "style cartoon; fun; traits simples",
-    "barcodeData": [
-        {
-            "positionIndexReference": 348,
-            "type": "prompt",
-            "name": "personnage",
-            "z-index": 0,
-            "_max": 8,
-            "values": [
-                {
-                    "id": 0,
-                    "value": "elephant rigolo"
-                },
-                {
-                    "id": 1,
-                    "value": "aligator rigolo"
-                }
-            ]
+    "barcodeData": {
+        "prompt": [
+            {
+                "type": "prompt",
+                "name": "decor",
+                "z-index": 0,
+                "size": 3,
+                "factor": 0.7,
+                "bitposition": 34,
+                "values": [
+                    {
+                        "id": 0,
+                        "value": "jungle"
+                    },
+                    {
+                        "id": 1,
+                        "value": "town"
+                    },
+                    {
+                        "id": 2,
+                        "value": "desert"
+                    }
+                ]
+            },
+            {
+                "type": "prompt",
+                "name": "personnage",
+                "z-index": 1,
+                "size": 3,
+                "factor": 0.7,
+                "bitposition": 2,
+                "values": [
+                    {
+                        "id": 0,
+                        "value": " funny elephant"
+                    },
+                    {
+                        "id": 1,
+                        "value": " funny aligator"
+                    },
+                    {
+                        "id": 2,
+                        "value": " funny fox"
+                    },
+                    {
+                        "id": 3,
+                        "value": " wicked mole"
+                    },
+                    {
+                        "id": 4,
+                        "value": " funny hypnotizing snake"
+                    }
+                ]
+            },
+            {
+                "type": "prompt",
+                "name": "weapon",
+                "z-index": 1,
+                "size": 3,
+                "factor": 0.7,
+                "bitposition": 2,
+                "values": [
+                    {
+                        "id": 0,
+                        "value": " who sweeps",
+                        "special": {
+                            "type": "attack",
+                            "name": "depoussierage",
+                            "attack": 10,
+                            "turn": 3
+                        }
+                    },
+                    {
+                        "id": 1,
+                        "value": " who vacuums",
+                        "special": {
+                            "type": "attack",
+                            "name": "aspiration",
+                            "attack": 7,
+                            "turn": 2
+                        }
+                    },
+                    {
+                        "id": 2,
+                        "value": " who plays ping pong",
+                        "special": {
+                            "type": "attack",
+                            "name": "ping pong smash",
+                            "attack": 7,
+                            "turn": 2
+                        }
+                    },
+                    {
+                        "id": 3,
+                        "value": " in the middle of a heart",
+                        "special": {
+                            "type": "health",
+                            "name": "nouvelle petite amie",
+                            "attack": 30,
+                            "turn": 1
+                        }
+                    },{
+                        "id": 3,
+                        "value": " on a skateboard",
+                        "special": {
+                            "type": "attack",
+                            "name": "skate furry",
+                            "attack": 9,
+                            "turn": 2
+                        }
+                    }
+                ]
+            }
+        ],
+        "health": {
+            "z-index": 1,
+            "min": 5,
+            "max": 99,
+            "factor": 0.7,
+            "bitposition": 6
         },
-        {
-            "positionIndexReference": 348,
-            "type": "prompt",
-            "name": "personnage",
-            "z-index": 0,
-            "_max": 8,
+        "attack": {
+            "z-index": 1,
+            "min": 5,
+            "max": 80,
+            "factor": 0.55,
+            "bitposition": 9
+        },
+        "specials": {
+            "bitpositions": [
+                12,
+                6,
+                40
+            ],
+            "factor": 0.55,
+            "factorValue": 0.66,
             "values": [
                 {
                     "id": 0,
-                    "value": "elephant rigolo"
+                    "min": 15,
+                    "max": 30,
+                    "type": "health",
+                    "name": "nouvelle petite amie",
+                    "attack": 30,
+                    "turn": 1
                 },
                 {
                     "id": 1,
-                    "value": "aligator rigolo"
+                    "min": 15,
+                    "max": 30,
+                    "type": "attack",
+                    "name": "éclairs",
+                    "attack": 30,
+                    "turn": 1
                 }
             ]
         }
-    ]
+    }
 }
