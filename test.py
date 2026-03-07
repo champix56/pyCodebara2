@@ -1,17 +1,18 @@
 from codebara.cards.cardgen import CardGenerator
 #from codebara.users.user import User
 from codebara.users.userMysql import getSQLUserCoreDatas
-from codebara.seasons.season import seasonLoader
+from codebara.seasons.season import seasonsFilter
 import asyncio
 from codebara.ThreadPool.Pool import renderPool
 async def cardgen()->str:
     u=await getSQLUserCoreDatas(666)
-    season=seasonLoader()
+    seasons=seasonsFilter()
     if u is None:
         return "error"
     else :
-        cardgen=CardGenerator(season, u)
-        return await cardgen.generate(cb='123454321')
+        cardgen=CardGenerator(seasons, u)
+        #return await cardgen.generate(cb='64527486384936')
+        return await cardgen.generate(cb='64324543256')
 
 print(asyncio.run( cardgen()))
 print(renderPool.size)
