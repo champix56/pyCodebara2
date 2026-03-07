@@ -70,19 +70,21 @@
                 "name": "decor",
                 "z-index": 0,
                 "size": 3,
-                "factor": 0.7,
                 "bitposition": 34,
                 "values": [
                     {
                         "id": 0,
-                        "value": "jungle"
+                        "value": "jungle",
+                        "factor": 0.7
                     },
                     {
                         "id": 1,
+                        "factor": 0.7,
                         "value": "town"
                     },
                     {
                         "id": 2,
+                        "factor": 0.7,
                         "value": "desert"
                     }
                 ]
@@ -97,22 +99,27 @@
                 "values": [
                     {
                         "id": 0,
+                        "factor": 0.7,
                         "value": " funny elephant"
                     },
                     {
                         "id": 1,
+                        "factor": 0.7,
                         "value": " funny aligator"
                     },
                     {
                         "id": 2,
+                        "factor": 0.7,
                         "value": " funny fox"
                     },
                     {
                         "id": 3,
+                        "factor": 0.7,
                         "value": " wicked mole"
                     },
                     {
                         "id": 4,
+                        "factor": 0.7,
                         "value": " funny hypnotizing snake"
                     }
                 ]
@@ -122,11 +129,11 @@
                 "name": "weapon",
                 "z-index": 1,
                 "size": 3,
-                "factor": 0.7,
                 "bitposition": 2,
                 "values": [
                     {
                         "id": 0,
+                        "factor": 0.7,
                         "value": " who sweeps",
                         "special": {
                             "type": "attack",
@@ -137,6 +144,7 @@
                     },
                     {
                         "id": 1,
+                        "factor": 0.7,
                         "value": " who vacuums",
                         "special": {
                             "type": "attack",
@@ -147,6 +155,7 @@
                     },
                     {
                         "id": 2,
+                        "factor": 0.7,
                         "value": " who plays ping pong",
                         "special": {
                             "type": "attack",
@@ -157,6 +166,7 @@
                     },
                     {
                         "id": 3,
+                        "factor": 0.7,
                         "value": " in the middle of a heart",
                         "special": {
                             "type": "health",
@@ -164,8 +174,10 @@
                             "attack": 30,
                             "turn": 1
                         }
-                    },{
+                    },
+                    {
                         "id": 3,
+                        "factor": 0.7,
                         "value": " on a skateboard",
                         "special": {
                             "type": "attack",
