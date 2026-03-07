@@ -1,12 +1,12 @@
 {
-    "seasonid": 1,
-    "bitposition":19,
+    "seasonid": 0,
+    "bitposition":63,
     "bitsize":5,
-    "factor":0.6,
-    "seasonName": "beta-robots",
+    "factor":0.68,
+    "seasonName": "beta-animals-old",
     "startTime": "2025-01-01T00:00:01",
-    "endTime":null,
-    "ressourcesFolder": "/season/beta-robots/genbase",
+    "endTime":"2025-01-10T23:59:01",
+    "ressourcesFolder": "/season/beta-animals.old/genbase",
     "seasonSeed": 2341,
     "deck": {
         "frontUrl": "/season/standard/front.png",

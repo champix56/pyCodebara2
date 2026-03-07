@@ -1,10 +1,13 @@
 {
     "seasons": [
         {
-            "loc": "/seasons/beta-animals"
+            "loc": "/seasons/beta-animals/season.json"
         },
         {
-            "loc": "/seasons/beta-robots"
+            "loc": "/seasons/beta-animals.old/season.json"
+        },
+        {
+            "loc": "/seasons/beta-robots/season.json"
         }
     ]
 }

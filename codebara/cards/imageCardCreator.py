@@ -29,7 +29,7 @@ class Location1D:
     h: int
     color: str
 
-    def __init__(self, x, y, color: str = "#FFFFFF", h: int | None = 1):
+    def __init__(self, x, y, color: str = "#FFFFFF", h: int  = 1):
         self.x = x
         self.y = y
         self.h = h
@@ -154,8 +154,8 @@ class CardImageCreator:
     def create(self, specs: CardSpecs, centralImageLoc:str)->str:
         self.outputFormat=format
         self.specs = specs
-        self._createEmptyBase("./season/standard/front.png")
-        self._addPerso(loc=centralImageLoc)# if DEBUG is True and centralImageLoc is not None else "./season/beta/2.png")
+        self._createEmptyBase("./seasons/standard/front.png")
+        self._addPerso(loc=centralImageLoc)# if DEBUG is True and centralImageLoc is not None else "./seasons/beta/2.png")
         self._addName()
         self._addAttack()
         self._addHealth()
@@ -197,7 +197,7 @@ class CardImageCreator:
     def _addName(self):
         draw = ImageDraw.Draw(self.tmpImage)
         font = ImageFont.truetype(
-            "./season/standard/ArianaVioleta-dz2K.ttf", float(str(self.nameLoc.h))
+            "./seasons/standard/ArianaVioleta-dz2K.ttf", float(str(self.nameLoc.h))
         )
         draw.text(
             (self.nameLoc.x, self.nameLoc.y),
@@ -246,7 +246,7 @@ class CardImageCreator:
         self, value: int, x: int, y: int, h: int, color: str = "WHITE"
     ):
         draw = ImageDraw.Draw(self.tmpImage)
-        font = ImageFont.truetype("./season/standard/GalaferaMedium.ttf", h)
+        font = ImageFont.truetype("./seasons/standard/GalaferaMedium.ttf", h)
         draw.text((x, y), str(value), color, font=font)
 
     def _addGenericGraphSpec(
@@ -260,7 +260,7 @@ class CardImageCreator:
         positionY = self.specialsSpecLoc.y
         draw = ImageDraw.Draw(self.tmpImage)
         font = ImageFont.truetype(
-            "./season/standard/GalaferaMedium.ttf", float(str(self.specialsSpecLoc.h))
+            "./seasons/standard/GalaferaMedium.ttf", float(str(self.specialsSpecLoc.h))
         )
         for spec in self.specs.specs:
             self._printSpecialSpec(
@@ -288,7 +288,7 @@ class CardImageCreator:
     def _addSerialNumber(self, serial: str):
         draw = ImageDraw.Draw(self.tmpImage)
         font = ImageFont.truetype(
-            "./season/standard/GalaferaMedium.ttf", float(str(self.serialLoc.h))
+            "./seasons/standard/GalaferaMedium.ttf", float(str(self.serialLoc.h))
         )
         draw.text(
             (self.serialLoc.x, self.serialLoc.y),
