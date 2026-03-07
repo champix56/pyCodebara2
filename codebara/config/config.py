@@ -24,7 +24,7 @@ IMAGE_IA_GEN_BODY_BASE={
   "token_merging": 0,
   "number_of_images": 1,
   "seed": 123123,
-  "use_seed": False,
+  "use_seed": True,
   "use_safety_checker": False,
   "diffusion_task": "text_to_image",
   "lora": {
