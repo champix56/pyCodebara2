@@ -1,8 +1,13 @@
 {
-    "seasonid": 0,
-    "seasonName": "beta",
+    "seasonid": 1,
+    "bitposition":19,
+    "bitsize":5,
+    "factor":1,
+    "seasonName": "beta-robots",
     "startTime": "2025-01-01T00:00:01",
-    "ressourcesFolder": "/season/beta",
+    "endTime":null,
+    "ressourcesFolder": "/season/beta-robots/genbase",
+    "seasonSeed": 2341,
     "deck": {
         "frontUrl": "/season/standard/front.png",
         "backUrl": "/season/standard/back.png",
@@ -69,7 +74,7 @@
                 "type": "prompt",
                 "name": "decor",
                 "z-index": 0,
-                "size": 3,
+                "bitsize": 3,
                 "bitposition": 34,
                 "values": [
                     {
@@ -93,7 +98,7 @@
                 "type": "prompt",
                 "name": "personnage",
                 "z-index": 1,
-                "size": 3,
+                "bitsize": 3,
                 "factor": 0.7,
                 "bitposition": 2,
                 "values": [
@@ -128,7 +133,7 @@
                 "type": "prompt",
                 "name": "weapon",
                 "z-index": 1,
-                "size": 3,
+                "bitsize": 3,
                 "bitposition": 2,
                 "values": [
                     {
@@ -190,17 +195,17 @@
             }
         ],
         "health": {
-            "z-index": 1,
             "min": 5,
             "max": 99,
-            "factor": 0.7,
+            "factor": 0.76,
+            "bitsize": 3,
             "bitposition": 6
         },
         "attack": {
-            "z-index": 1,
             "min": 5,
             "max": 80,
-            "factor": 0.55,
+            "factor": 0.69,
+            "bitsize": 3,
             "bitposition": 9
         },
         "specials": {

@@ -1,0 +1,10 @@
+{
+    "seasons": [
+        {
+            "loc": "/seasons/beta-animals"
+        },
+        {
+            "loc": "/seasons/beta-robots"
+        }
+    ]
+}

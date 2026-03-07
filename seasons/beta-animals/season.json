@@ -1,0 +1,241 @@
+{
+    "seasonid": 0,
+    "bitposition":63,
+    "bitsize":5,
+    "factor":0.8,
+    "seasonName": "beta-animals",
+    "startTime": "2025-01-01T00:00:01",
+    "endTime":null,
+    "ressourcesFolder": "/season/beta-animals/genbase",
+    "seasonSeed": 2341,
+    "deck": {
+        "frontUrl": "/season/standard/front.png",
+        "backUrl": "/season/standard/back.png",
+        "width": 2370,
+        "height": 4096,
+        "positions": {
+            "name": {
+                "x": 100,
+                "y": 160,
+                "height": 180,
+                "color": "#0F0FAB"
+            },
+            "health": {
+                "x": 630,
+                "y": 2590,
+                "height": 93,
+                "color": "#0F0FAB"
+            },
+            "healthbar": {
+                "x": 860,
+                "y": 2580,
+                "height": 100,
+                "width": 1300,
+                "color": "#0F0FAB"
+            },
+            "attack": {
+                "x": 630,
+                "y": 2790,
+                "height": 93,
+                "color": "#0F0FAB"
+            },
+            "attackbar": {
+                "x": 860,
+                "y": 2780,
+                "height": 100,
+                "width": 1300,
+                "color": "#0F0FAB"
+            },
+            "special": {
+                "x": 170,
+                "y": 3150,
+                "height": 100,
+                "color": "#0F0FAB"
+            },
+            "image": {
+                "x": 108,
+                "y": 367,
+                "width": 2151,
+                "height": 1981,
+                "color": "#0F0FAB"
+            },
+            "id": {
+                "x": 50,
+                "y": 3996,
+                "height": 70,
+                "color": "#FAFAFAFA"
+            }
+        }
+    },
+    "promptBase": "style cartoon; fun; traits simples",
+    "barcodeData": {
+        "prompt": [
+            {
+                "type": "prompt",
+                "name": "decor",
+                "z-index": 0,
+                "bitsize": 3,
+                "bitposition": 34,
+                "values": [
+                    {
+                        "id": 0,
+                        "value": "jungle",
+                        "factor": 0.7
+                    },
+                    {
+                        "id": 1,
+                        "factor": 0.7,
+                        "value": "town"
+                    },
+                    {
+                        "id": 2,
+                        "factor": 0.7,
+                        "value": "desert"
+                    }
+                ]
+            },
+            {
+                "type": "prompt",
+                "name": "personnage",
+                "z-index": 1,
+                "bitsize": 3,
+                "factor": 0.7,
+                "bitposition": 2,
+                "values": [
+                    {
+                        "id": 0,
+                        "factor": 0.7,
+                        "value": " funny elephant"
+                    },
+                    {
+                        "id": 1,
+                        "factor": 0.7,
+                        "value": " funny aligator"
+                    },
+                    {
+                        "id": 2,
+                        "factor": 0.7,
+                        "value": " funny fox"
+                    },
+                    {
+                        "id": 3,
+                        "factor": 0.7,
+                        "value": " wicked mole"
+                    },
+                    {
+                        "id": 4,
+                        "factor": 0.7,
+                        "value": " funny hypnotizing snake"
+                    }
+                ]
+            },
+            {
+                "type": "prompt",
+                "name": "weapon",
+                "z-index": 1,
+                "bitsize": 3,
+                "bitposition": 2,
+                "values": [
+                    {
+                        "id": 0,
+                        "factor": 0.7,
+                        "value": " who sweeps",
+                        "special": {
+                            "type": "attack",
+                            "name": "depoussierage",
+                            "attack": 10,
+                            "turn": 3
+                        }
+                    },
+                    {
+                        "id": 1,
+                        "factor": 0.7,
+                        "value": " who vacuums",
+                        "special": {
+                            "type": "attack",
+                            "name": "aspiration",
+                            "attack": 7,
+                            "turn": 2
+                        }
+                    },
+                    {
+                        "id": 2,
+                        "factor": 0.7,
+                        "value": " who plays ping pong",
+                        "special": {
+                            "type": "attack",
+                            "name": "ping pong smash",
+                            "attack": 7,
+                            "turn": 2
+                        }
+                    },
+                    {
+                        "id": 3,
+                        "factor": 0.7,
+                        "value": " in the middle of a heart",
+                        "special": {
+                            "type": "health",
+                            "name": "nouvelle petite amie",
+                            "attack": 30,
+                            "turn": 1
+                        }
+                    },
+                    {
+                        "id": 3,
+                        "factor": 0.7,
+                        "value": " on a skateboard",
+                        "special": {
+                            "type": "attack",
+                            "name": "skate furry",
+                            "attack": 9,
+                            "turn": 2
+                        }
+                    }
+                ]
+            }
+        ],
+        "health": {
+            "min": 5,
+            "max": 99,
+            "factor": 0.76,
+            "bitsize": 3,
+            "bitposition": 6
+        },
+        "attack": {
+            "min": 5,
+            "max": 80,
+            "factor": 0.69,
+            "bitsize": 3,
+            "bitposition": 9
+        },
+        "specials": {
+            "bitpositions": [
+                12,
+                6,
+                40
+            ],
+            "factor": 0.55,
+            "factorValue": 0.66,
+            "values": [
+                {
+                    "id": 0,
+                    "min": 15,
+                    "max": 30,
+                    "type": "health",
+                    "name": "nouvelle petite amie",
+                    "attack": 30,
+                    "turn": 1
+                },
+                {
+                    "id": 1,
+                    "min": 15,
+                    "max": 30,
+                    "type": "attack",
+                    "name": "éclairs",
+                    "attack": 30,
+                    "turn": 1
+                }
+            ]
+        }
+    }
+}
