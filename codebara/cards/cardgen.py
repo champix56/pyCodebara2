@@ -5,14 +5,14 @@ import datetime
 import http.client
 import json
 import math
-import random
+from pathlib import Path
 from io import BytesIO
 from threading import Thread
 from typing import Final
-
+import os
 from aiohttp import web
 from PIL import Image
-
+from codebara.tools.common import splitmix64, build_seed
 from codebara.cards.cardMysql import register_requestCard
 from codebara.cards.imageCardCreator import CardImageCreator, CardSpecs, SpecialSpec
 from codebara.config import (
@@ -27,9 +27,7 @@ from codebara.users import user
 
 # from codebara.errors import HttpOutputResponse
 DEBUG_USERCORE_DATAS = user.UserCoreDatas(-1, 12)
-MASK64: Final[int] = 0xFFFFFFFFFFFFFFFF
 MIN_WEIGHT: Final[float] = 1e-9
-
 
 class CardGenerator:
     userDatas: user.UserCoreDatas
@@ -45,13 +43,15 @@ class CardGenerator:
     estimatedTime: int = 120
     promptUserSeed: int
     season: dict
+    seasons:list[dict]
     centralImageId: str
     specs: CardSpecs
     specialSpecs: list[SpecialSpec]
 
     def __init__(
         self,
-        season: dict | None = None,
+        #season: dict | None = None,
+        seasons:list[dict],
         userDatas: user.UserCoreDatas = DEBUG_USERCORE_DATAS,
     ):
         print("generator instanciate for user:" + str(userDatas.uid))
@@ -59,28 +59,14 @@ class CardGenerator:
         self.promptUserSeed = userDatas.seed
         seededRandom(self.promptUserSeed, self.promptUserSeed)
         self.dateRequest = datetime.datetime.now()
-        if season is None:
+        """if season is None:
             self.season = seasonLoader()
         else:
-            self.season = season
+            self.season = season"""
+        self.seasons = seasons
         self.IArequest = IMAGE_IA_GEN_BODY_BASE
 
     # https://chatgpt.com/share/69abbae3-ee8c-800a-bd2e-2a3c96223f20
-
-    def _splitmix64(self, x: int) -> int:
-        """PRNG déterministe SplitMix64."""
-        x = (x + 0x9E3779B97F4A7C15) & MASK64
-        z = x
-        z = (z ^ (z >> 30)) * 0xBF58476D1CE4E5B9 & MASK64
-        z = (z ^ (z >> 27)) * 0x94D049BB133111EB & MASK64
-        return z ^ (z >> 31)
-
-    def _build_seed(self, seed_user: int, season_seed: int, cb_field_input: int) -> int:
-        """Combine les seeds de manière déterministe."""
-        x = seed_user
-        x ^= season_seed << 21
-        x ^= cb_field_input << 42
-        return self._splitmix64(x)
 
     def _deterministic_weighted_choice(
         self,
@@ -100,12 +86,14 @@ class CardGenerator:
 
         if not elements:
             raise ValueError("elements ne peut pas être vide")
-
-        seed = self._build_seed(
-            self.userDatas.seed, self.season["seasonSeed"], cb_field_input
+        try:
+            seasonSeed=self.season["seasonSeed"]
+        except AttributeError:
+            seasonSeed=2543254
+        seed = build_seed(seed_user=self.userDatas.seed,season_seed= seasonSeed,cb_field_input= cb_field_input
         )
 
-        rand64 = self._splitmix64(seed)
+        rand64 = splitmix64(seed)
         r = rand64 / 2**64
 
         weights = []
@@ -158,9 +146,9 @@ class CardGenerator:
 
         factor = min(1.0, max(0.0, factor))
 
-        seed = self._build_seed(self.userDatas.seed,self.season['seasonSeed'], cbfield)
+        seed = build_seed(self.userDatas.seed,self.season['seasonSeed'], cbfield)
 
-        rand64 = self._splitmix64(seed)
+        rand64 = splitmix64(seed)
 
         r = rand64 / 2**64
 
@@ -215,26 +203,27 @@ class CardGenerator:
 
     def _createImage(self):
         print("create image")
+        creator = CardImageCreator(self.userDatas.uid, self.season)
+        loc = creator.create(self.specs, '.'+self.season['ressourcesFolder']+'/'+self.centralImageId+".png")
+        print("output:" + loc)
 
     def _calculate(self):
-        centralId = "_" + str(random.randint(1234, 1345678765432))
-        self.specialSpecs = [SpecialSpec(name="spacial attack", attack=0, health=10)]
-        """self.specs = CardSpecs("", 50, 100, self.specialSpecs)"""
-        self.prompt = ";panda;avec un rouleau de papier toilette"
-        self.centralImageId = centralId
-
+        #calcul de la saison
+        self.season=self.seasons[self._deterministic_weighted_choice(self.seasons,int(self.cb))]
         # creation du prompt
         self.prompt = self.season["promptBase"]
+        imageId=""
         for part in self.season["barcodeData"]["prompt"]:
             print(part["name"])
             cbValueForPart = int(self.cb[part["bitposition"]: -(len(self.cb)-part["bitposition"]-part["bitsize"])])
             valueindex = self._deterministic_weighted_choice(
                 part["values"], cbValueForPart
             )
+            imageId+=str(valueindex)
             self.prompt += ";" + part["values"][valueindex]["value"]
             self.selectedContent.append(part["values"][valueindex])
         # end for
-
+        self.centralImageId = str(self.season['seasonid'])+"_" + imageId+'_'+str(self.userDatas.seed)
         #calculate basics values
         part=self.season["barcodeData"]['health']
         cbValueForPart = int(self.cb[part["bitposition"]: -(len(self.cb)-part["bitposition"]-part["bitsize"])])
@@ -244,12 +233,6 @@ class CardGenerator:
         attack=self._deterministic_weighted_value(part["min"],part["max"],part["factor"],cbValueForPart)
         self.specs=CardSpecs(name="",attack=attack,health=health,specs=None)
 
-
-
-        # construction de la requete IA a partir de la base de requete
-        self.IArequest["prompt"] = self.prompt
-        print(json.dumps(self.IArequest))
-        self.IArequest["seed"] = self.userDatas.seed
         print("calculatedCard")
         print(self)
 
@@ -257,7 +240,6 @@ class CardGenerator:
         try:
             host = IMAGE_IA_GEN_REST_URL
             conn = http.client.HTTPConnection(host)
-            self.IArequest["prompt"] += self.prompt
             conn.request(
                 method=IMAGE_IA_GEN_ENDPOINT_METHOD,
                 url=IMAGE_IA_GEN_ENDPOINT_GEN,
@@ -271,15 +253,15 @@ class CardGenerator:
             jsonObj = json.loads(string)
             print(jsonObj["images"][0])
             conn.close()
-            with open("./outputfile", "w") as fout:
+            if os.path.isdir('.'+self.season['ressourcesFolder']) is not True:
+                os.makedirs('.'+self.season['ressourcesFolder'])
+            with open('.'+self.season['ressourcesFolder']+'/'+self.centralImageId+".json", "w") as fout:
                 json.dump(jsonObj, fout)
             file_content = jsonObj["images"][0]
             image_bytes = base64.b64decode(file_content)
             image = Image.open(BytesIO(image_bytes))
-            image.save("./" + self.centralImageId + ".png", format="PNG")
-            creator = CardImageCreator(self.userDatas.uid, self.season)
-            loc = creator.create(self.specs, "./" + self.centralImageId + ".png")
-            print("output:" + loc)
+            image.save("." + self.season['ressourcesFolder']+'/'+self.centralImageId+".png", format="PNG")
+            self._createImage()
         except KeyError:
             print("error http")
         print("request IA")
@@ -291,22 +273,22 @@ class CardGenerator:
         )
         return self.temporaryId
 
-    def _getPrompt(self):
-        print("create Prompt")
-
     def _assembleRequest(self):
-        # self._assembleRequest()
-        print("assemble request")
+       # construction de la requete IA a partir de la base de requete
+        self.IArequest["prompt"] = self.prompt
+        print(json.dumps(self.IArequest))
+        self.IArequest["seed"] = self.userDatas.seed
 
     def _checkIfImageAlredyExist(self):
-        print("check if image already generated")
+        my_file = Path('.'+self.season['ressourcesFolder']+'/'+self.centralImageId+".png")
+        if my_file.is_file():
+            return True
+        else:
+            return False
 
     def _finalizeCardOndb(self):
         print("set on db finalization of card")
 
-    """def _getSeed(self):
-        self.promptUserSeed=random.randint(2,1000)
-        print("get user Seed")"""
 
     def toResponse(self, request) -> web.Response:
         print("to web response")

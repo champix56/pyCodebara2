@@ -1,4 +1,7 @@
 import math
+from typing import Final
+
+
 def seededRandom(
     seed1: int, seed2: int, min: int = 1, max: int = 100000, renderProb=0.5
 ):
@@ -23,3 +26,23 @@ def seededRandom(
     return math.floor(
         min + biasFactor * (max - min)
     )  # Assure que la valeur est entre min et max
+
+
+MASK64: Final[int] = 0xFFFFFFFFFFFFFFFF
+
+
+def splitmix64(x: int) -> int:
+    """PRNG déterministe SplitMix64."""
+    x = (x + 0x9E3779B97F4A7C15) & MASK64
+    z = x
+    z = (z ^ (z >> 30)) * 0xBF58476D1CE4E5B9 & MASK64
+    z = (z ^ (z >> 27)) * 0x94D049BB133111EB & MASK64
+    return z ^ (z >> 31)
+
+
+def build_seed(seed_user: int, season_seed: int, cb_field_input: int) -> int:
+    """Combine les seeds de manière déterministe."""
+    x = seed_user
+    x ^= season_seed << 21
+    x ^= cb_field_input << 42
+    return splitmix64(x)
