@@ -282,8 +282,10 @@ class CardGenerator:
     def _checkIfImageAlredyExist(self):
         my_file = Path('.'+self.season['ressourcesFolder']+'/'+self.centralImageId+".png")
         if my_file.is_file():
+            self.isNewImage=False
             return True
         else:
+            self.isNewImage=True
             return False
 
     def _finalizeCardOndb(self):
