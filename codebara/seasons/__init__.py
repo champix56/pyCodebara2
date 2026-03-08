@@ -1,3 +1,3 @@
-from .season import seasonLoader
+from .season import seasonLoader, seasonsFilter
 
-__all__=["seasonLoader"]
+__all__=["seasonLoader", "seasonsFilter"]
