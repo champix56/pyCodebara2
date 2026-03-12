@@ -1,7 +1,7 @@
 IMAGE_IA_GEN_REST_URL="0.0.0.0:8000"
 IMAGE_IA_GEN_ENDPOINT_GEN="/api/generate"
 IMAGE_IA_GEN_ENDPOINT_METHOD="POST"
-IMAGE_IA_GEN_BODY_BASE={
+IMAGE_IA_GEN_BODY_BASE:dict={
   "lcm_model_id": "stabilityai/sd-turbo",
   "openvino_lcm_model_id": "rupeshs/sd-turbo-openvino",
   "use_offline_model": False,
@@ -18,34 +18,24 @@ IMAGE_IA_GEN_BODY_BASE={
   "strength": 0.6,
   "image_height": 512,
   "image_width": 512,
-  "inference_steps": 1,
+  "inference_steps": 5,
   "guidance_scale": 1,
   "clip_skip": 1,
   "token_merging": 0,
   "number_of_images": 1,
-  "seed": 123123,
+  "seed": 6,
   "use_seed": True,
   "use_safety_checker": False,
   "diffusion_task": "text_to_image",
-  "lora": {
-    "models_dir": "/home/champix/PycharmProjects/fastsdcpu/lora_models",
-    "weight": 0.5,
-    "fuse": True,
-    "enabled": False
-  },
+  #"lora": {"models_dir": "/home/champix/projet/fastsdcpu/lora_models","weight": 0.5,"fuse": True,"enabled": False},
   "controlnet": {
     "adapter_path": "string",
     "conditioning_scale": 0.5,
     "enabled": False
   },
-  "dirs": {
-    "controlnet": "/home/champix/PycharmProjects/fastsdcpu/controlnet_models",
-    "lora": "/home/champix/PycharmProjects/fastsdcpu/lora_models"
-  },
+  #"dirs": { "controlnet": "/home/champix/projet/fastsdcpu/controlnet_models","lora": "/home/champix/projet/fastsdcpu/lora_models"},
   "rebuild_pipeline": False,
   "rebuild_controlnet_pipeline": False,
   "use_gguf_model": False,
-  "gguf_model": {
-    "gguf_models": "/home/champix/PycharmProjects/fastsdcpu/models/gguf"
-  }
+  #"gguf_model": {"gguf_models": "/home/champix/projet/fastsdcpu/models/gguf"}
 }
