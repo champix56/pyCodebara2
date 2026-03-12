@@ -1,7 +1,8 @@
 #codebara season IA generated ressources
-seasons/**/genbase/*.png
-**/genbase/*.json
-*.png
+seasons/**/gen*/*.png
+season/**/gen*/*.png
+**/genbase*/*.json
+tmp/**/*.png
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
