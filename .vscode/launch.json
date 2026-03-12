@@ -14,6 +14,16 @@
       "console": "integratedTerminal",
       "justMyCode": true
     },
+    {
+      "name": "Python: genSeason",
+      "type": "debugpy",
+      "request": "launch",
+      //"program": "${file}",
+      "program": "gen_season.py",
+      "python": "${workspaceFolder}/venv/bin/python",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
      {
       "name": "test Python: Debug (venv)",
       "type": "debugpy",
