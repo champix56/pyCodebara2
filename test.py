@@ -3,19 +3,45 @@ from codebara.cards.cardgen import CardGenerator
 from codebara.users.userMysql import getSQLUserCoreDatas
 from codebara.seasons.season import seasonsFilter
 import asyncio
-from codebara.ThreadPool.Pool import renderPool
+#from codebara.ThreadPool.Pool import renderPool
+import random
+def compute_ean13_checksum(code12: str) -> str:
+    """
+    Calcule le checksum EAN13 à partir des 12 premiers chiffres
+    """
+    s = 0
+    for i, digit in enumerate(code12):
+        n = int(digit)
+        if i % 2 == 0:
+            s += n
+        else:
+            s += n * 3
+    checksum = (10 - (s % 10)) % 10
+    return str(checksum)
+
+
+def random_ean13():
+    """
+    Génère un code barre EAN13 valide
+    """
+    code12 = ''.join(str(random.randint(0, 9)) for _ in range(12))
+    return code12 + compute_ean13_checksum(code12)
+
 async def cardgen()->str:
     u=await getSQLUserCoreDatas(666)
     seasons=seasonsFilter()
     if u is None:
         return "error"
     else :
-        cardgen=CardGenerator(seasons, u)
         #return await cardgen.generate(cb='64527486384936')
-        return await cardgen.generate(cb='64324543256')
+        for k in range(500):
+            u.seed=random.randint(1,6)
+            cardgen=CardGenerator(seasons, u)
+            print(await cardgen.generate(cb=random_ean13()))
+    return 'end'
 
 print(asyncio.run( cardgen()))
-print(renderPool.size)
+#print(renderPool.size)
 #user=User(666,999,'GOD', 'god@codebara.com',99999999)
 #u=user.parentInstance()
 
