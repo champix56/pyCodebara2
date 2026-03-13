@@ -24,7 +24,7 @@ from codebara.config import (
 from codebara.seasons.season import seasonLoader
 from codebara.tools.common import seededRandom
 from codebara.users import user
-
+TEST=True
 # from codebara.errors import HttpOutputResponse
 DEBUG_USERCORE_DATAS = user.UserCoreDatas(-1, 12)
 MIN_WEIGHT: Final[float] = 1e-9
@@ -54,7 +54,7 @@ class CardGenerator:
         seasons:list[dict],
         userDatas: user.UserCoreDatas = DEBUG_USERCORE_DATAS,
     ):
-        print("generator instanciate for user:" + str(userDatas.uid))
+        print("generator instanciate for user:" + str(userDatas.uid)+" for seed:" + str(userDatas.seed))
         self.userDatas = userDatas
         self.promptUserSeed = userDatas.seed
         seededRandom(self.promptUserSeed, self.promptUserSeed)
@@ -186,6 +186,7 @@ class CardGenerator:
         self.cb = finalCode
 
     async def generate(self, cb: str):
+        print('ean13:'+cb)
         self.realcb = cb
         self.cb = cb
         self._barcodeStandardization(self.promptUserSeed)
@@ -197,8 +198,11 @@ class CardGenerator:
         else:
             self._assembleRequest()
             # renderPool.push(self._syncCreateCard)
-            t = Thread(target=self._syncCreateCard)
-            t.start()
+            if TEST is False:
+                t = Thread(target=self._syncCreateCard)
+                t.start()
+            else:
+                    self._syncCreateCard()
         return self.temporaryId
 
     def _createImage(self):
@@ -222,6 +226,7 @@ class CardGenerator:
             imageId+=str(valueindex)
             self.prompt += ";" + part["values"][valueindex]["value"]
             self.selectedContent.append(part["values"][valueindex])
+            print(self.prompt)
         # end for
         self.centralImageId = str(self.season['seasonid'])+"_" + imageId+'_'+str(self.userDatas.seed)
         #calculate basics values
@@ -251,7 +256,7 @@ class CardGenerator:
             data1 = response.read()
             string = data1.decode("utf-8")
             jsonObj = json.loads(string)
-            print(jsonObj["images"][0])
+            #print(jsonObj["images"][0])
             conn.close()
             if os.path.isdir('.'+self.season['ressourcesFolder']) is not True:
                 os.makedirs('.'+self.season['ressourcesFolder'])
