@@ -12,3 +12,17 @@ async def register_requestCard(userid:int, request:dict)->int:
         return res[0]['temporary_request_id']
     except IndexError:
         return -1
+async def register_requestCardLocAndHash(userid:int,cardid:str,fileloc:str,hash:str)->None:
+    sql=MySQLClient()
+    await sql.connect()
+    sqlReq="UPDATE `cdb`.`card_request` SET `fileloc`='"+fileloc+"', `cardHash`='"+hash+"' WHERE  `id`="+cardid+";"
+    await sql.nonQuery(sqlReq)
+async def check_cardHash(cardid:str,hash:str)->bool:
+    sql=MySQLClient()
+    await sql.connect()
+    sqlReq="SELECT id FROM card_request WHERE id="+cardid+" and cardHash='"+hash+"'"
+    res=await sql.execute(sqlReq)
+    if res[0] is not None:
+        return True
+    else:
+        return False
