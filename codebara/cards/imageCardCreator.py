@@ -151,9 +151,14 @@ class CardImageCreator:
         self.tmpImage.save(outputFileName, "PNG",quality=1)
         print(outputFileName)
         return outputFileName
-    def create(self, specs: CardSpecs, centralImageLoc:str)->str:
+    def create(self, specs: CardSpecs, centralImageLoc:str, outputFilename:str|None=None)->str:
         self.outputFormat=format
         self.specs = specs
+        if outputFilename is not None:
+            if not outputFilename.startswith('.'):
+                self.outLoc='.'+outputFilename
+            else:
+                self.outLoc=outputFilename
         self._createEmptyBase("./seasons/standard/front.png")
         self._addPerso(loc=centralImageLoc)# if DEBUG is True and centralImageLoc is not None else "./seasons/beta/2.png")
         self._addName()
