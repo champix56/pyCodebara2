@@ -1,14 +1,12 @@
 import aiomysql
 from typing import Any, List, Optional, Tuple
-import asyncio
-
-import os
+#import asyncio
+from codebara.config import SCHEMA_NAME, DB_HOST, DB_PORT, DB_USER, DB_PASSWORD
+#import os
 """
 DB_HOST = os.getenv("DB_HOST", "mysql")  # doit être 'mysql', pas 'localhost'
 DB_PORT = int(os.getenv("DB_PORT", 3306))
 """
-DB_HOST = '127.0.0.1'
-DB_PORT = 3306
 
 class MySQLClient:
     """
@@ -18,9 +16,9 @@ class MySQLClient:
     def __init__(
         self,
         host: str = DB_HOST,
-        user: str = "champix",
-        password: str = "alex",
-        database: str = "cdb",
+        user: str = DB_USER,
+        password: str = DB_PASSWORD,
+        database: str = SCHEMA_NAME,
         port: int = DB_PORT,
         minsize: int = 1,
         maxsize: int = 10
