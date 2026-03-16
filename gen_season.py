@@ -7,7 +7,7 @@ import json
 from io import BytesIO
 from pathlib import Path
 from PIL import Image
-from codebara.config.config import IMAGE_IA_GEN_BODY_BASE, IMAGE_IA_GEN_ENDPOINT_GEN, IMAGE_IA_GEN_ENDPOINT_METHOD,IMAGE_IA_GEN_REST_URL
+from codebara.config.IAconfig import IMAGE_IA_GEN_BODY_BASE, IMAGE_IA_GEN_ENDPOINT_GEN, IMAGE_IA_GEN_ENDPOINT_METHOD,IMAGE_IA_GEN_REST_URL
 __DEBUG=False
 seasons=seasonsFilter()
 
