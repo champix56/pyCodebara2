@@ -5,15 +5,17 @@ import datetime
 import http.client
 import json
 import math
-from pathlib import Path
+import os
 from io import BytesIO
+from pathlib import Path
+import shutil
 from threading import Thread
 from typing import Final
-import os
+import tarfile
+import hashlib
 from aiohttp import web
 from PIL import Image
-from codebara.tools.common import splitmix64, build_seed
-from codebara.cards.cardMysql import register_requestCard
+from codebara.cards.cardMysql import register_requestCard, register_requestCardLocAndHash
 from codebara.cards.imageCardCreator import CardImageCreator, CardSpecs, SpecialSpec
 from codebara.config import (
     IMAGE_IA_GEN_BODY_BASE,
@@ -21,15 +23,20 @@ from codebara.config import (
     IMAGE_IA_GEN_ENDPOINT_METHOD,
     IMAGE_IA_GEN_REST_URL,
 )
-from codebara.seasons.season import seasonLoader
-from codebara.tools.common import seededRandom
+#from codebara.seasons.season import seasonLoader
+from codebara.tools.common import build_seed, seededRandom, splitmix64
+from codebara.tools import getSha256FromFile, getSha256OfStr
 from codebara.users import user
-TEST=True
+TEST = True
 # from codebara.errors import HttpOutputResponse
-DEBUG_USERCORE_DATAS = user.UserCoreDatas(-1, 12)
+h = hashlib.new('sha256')
+h.update(b"godmdp")
+DEBUG_USERCORE_DATAS = user.UserCoreDatas(-1, 12,h.hexdigest())
 MIN_WEIGHT: Final[float] = 1e-9
 
+
 class CardGenerator:
+    cardId:int
     userDatas: user.UserCoreDatas
     realcb: str
     cb: str
@@ -43,18 +50,23 @@ class CardGenerator:
     estimatedTime: int = 120
     promptUserSeed: int
     season: dict
-    seasons:list[dict]
+    seasons: list[dict]
     centralImageId: str
     specs: CardSpecs
     specialSpecs: list[SpecialSpec]
 
     def __init__(
         self,
-        #season: dict | None = None,
-        seasons:list[dict],
+        # season: dict | None = None,
+        seasons: list[dict],
         userDatas: user.UserCoreDatas = DEBUG_USERCORE_DATAS,
     ):
-        print("generator instanciate for user:" + str(userDatas.uid)+" for seed:" + str(userDatas.seed))
+        print(
+            "generator instanciate for user:"
+            + str(userDatas.uid)
+            + " for seed:"
+            + str(userDatas.seed)
+        )
         self.userDatas = userDatas
         self.promptUserSeed = userDatas.seed
         seededRandom(self.promptUserSeed, self.promptUserSeed)
@@ -87,10 +99,13 @@ class CardGenerator:
         if not elements:
             raise ValueError("elements ne peut pas être vide")
         try:
-            seasonSeed=self.season["seasonSeed"]
+            seasonSeed = self.season["seasonSeed"]
         except AttributeError:
-            seasonSeed=2543254
-        seed = build_seed(seed_user=self.userDatas.seed,season_seed= seasonSeed,cb_field_input= cb_field_input
+            seasonSeed = 2543254
+        seed = build_seed(
+            seed_user=self.userDatas.seed,
+            season_seed=seasonSeed,
+            cb_field_input=cb_field_input,
         )
 
         rand64 = splitmix64(seed)
@@ -146,7 +161,7 @@ class CardGenerator:
 
         factor = min(1.0, max(0.0, factor))
 
-        seed = build_seed(self.userDatas.seed,self.season['seasonSeed'], cbfield)
+        seed = build_seed(self.userDatas.seed, self.season["seasonSeed"], cbfield)
 
         rand64 = splitmix64(seed)
 
@@ -186,12 +201,13 @@ class CardGenerator:
         self.cb = finalCode
 
     async def generate(self, cb: str):
-        print('ean13:'+cb)
+        print("ean13:" + cb)
         self.realcb = cb
         self.cb = cb
         self._barcodeStandardization(self.promptUserSeed)
         self._calculate()
         self.temporaryId = await self._registerRequest()
+        self.cardId=self.temporaryId
         self._checkIfImageAlredyExist()
         if not self.isNewImage:
             self._createImage()
@@ -202,41 +218,111 @@ class CardGenerator:
                 t = Thread(target=self._syncCreateCard)
                 t.start()
             else:
-                    self._syncCreateCard()
+                self._syncCreateCard()
         return self.temporaryId
 
     def _createImage(self):
         print("create image")
         creator = CardImageCreator(self.userDatas.uid, self.season)
-        loc = creator.create(self.specs, '.'+self.season['ressourcesFolder']+'/'+self.centralImageId+".png")
-        print("output:" + loc)
+        loc = creator.create(
+            self.specs,
+            "." + self.season["ressourcesFolder"] + "/" + self.centralImageId + ".png",
+        )
+        zipfilename=self.userDatas.serverDataLoc+'/'+str(self.cardId)
+        folder=zipfilename
+        zipfilename+=".tar.gz"
+        p=Path(folder)
+        if not p.is_dir():
+            p.mkdir(parents=True)
+        shutil.move(loc,folder+'/front.png')
+        img=Image.open(folder+'/front.png')
+        #img=img.resize((int(img.width/1.2),int(img.height/1.2)))
+        img.thumbnail((1185,2048))
+        img.save(folder+'/front.png', optimize=True)
+        hash={"front":getSha256FromFile(folder+'/front.png')}
+        shutil.copyfile("." + self.season["ressourcesFolder"] + "/" + self.centralImageId + ".png", folder+'/perso.png')
+        img=Image.open(folder+'/perso.png')
+        img.thumbnail((256,256))
+        img.save(folder+'/perso.png', optimize=True)
+        hash["perso"]=getSha256FromFile(folder+'/perso.png')
+        with open(folder+"/datas.json","w") as fout:
+            json.dump(self.specs.__dict__, fout)
+        hash["datas"]=getSha256FromFile(folder+"/datas.json")
+        img=Image.open("." + self.season["deck"]['backUrl'])
+        #img=img.resize((int(img.width/1.2),int(img.height/1.2)))
+        img.thumbnail((int(img.width/3),int(img.height/3)))
+        img.save(folder+'/back.png', optimize=True)
+        hash["datas"]=getSha256FromFile(folder+"/back.png")
+        with open(folder+"/hashs.json","w") as fout:
+            json.dump(hash, fout)
+        with tarfile.open( zipfilename, "w:xz") as tar:
+            for name in os.listdir( folder ):
+                #if not name.endswith('card.tar.gz'):
+                tar.add(folder+'/'+name, arcname=name)
+                os.remove(folder+'/'+name)
+        tar.close()
+        os.rmdir(folder)
+        register_requestCardLocAndHash(cardid=self.cardId, hash=getSha256FromFile(zipfilename),fileloc=zipfilename)
+        #hash={"archive":getSha256FromFile(zipfilename) }
+        #print("output:" + zipfilename)
+        #print("hash:",hash)
 
     def _calculate(self):
-        #calcul de la saison
-        self.season=self.seasons[self._deterministic_weighted_choice(self.seasons,int(self.cb))]
+        # calcul de la saison
+        self.season = self.seasons[
+            self._deterministic_weighted_choice(self.seasons, int(self.cb))
+        ]
         # creation du prompt
         self.prompt = self.season["promptBase"]
-        imageId=""
+        imageId = ""
         for part in self.season["barcodeData"]["prompt"]:
             print(part["name"])
-            cbValueForPart = int(self.cb[part["bitposition"]: -(len(self.cb)-part["bitposition"]-part["bitsize"])])
+            cbValueForPart = int(
+                self.cb[
+                    part["bitposition"] : -(
+                        len(self.cb) - part["bitposition"] - part["bitsize"]
+                    )
+                ]
+            )
             valueindex = self._deterministic_weighted_choice(
                 part["values"], cbValueForPart
             )
-            imageId+=str(valueindex)
+            imageId += str(valueindex)
             self.prompt += ";" + part["values"][valueindex]["value"]
             self.selectedContent.append(part["values"][valueindex])
             print(self.prompt)
         # end for
-        self.centralImageId = str(self.season['seasonid'])+"_" + imageId+'_'+str(self.userDatas.seed)
-        #calculate basics values
-        part=self.season["barcodeData"]['health']
-        cbValueForPart = int(self.cb[part["bitposition"]: -(len(self.cb)-part["bitposition"]-part["bitsize"])])
-        health=self._deterministic_weighted_value(part["min"],part["max"],part["factor"],cbValueForPart)
-        part=self.season["barcodeData"]['attack']
-        cbValueForPart = int(self.cb[part["bitposition"]: -(len(self.cb)-part["bitposition"]-part["bitsize"])])
-        attack=self._deterministic_weighted_value(part["min"],part["max"],part["factor"],cbValueForPart)
-        self.specs=CardSpecs(name="",attack=attack,health=health,specs=None)
+        self.centralImageId = (
+            str(self.season["seasonid"])
+            + "_"
+            + imageId
+            + "_"
+            + str(self.userDatas.seed)
+        )
+        # calculate basics values
+        part = self.season["barcodeData"]["health"]
+        cbValueForPart = int(
+            self.cb[
+                part["bitposition"] : -(
+                    len(self.cb) - part["bitposition"] - part["bitsize"]
+                )
+            ]
+        )
+        health = self._deterministic_weighted_value(
+            part["min"], part["max"], part["factor"], cbValueForPart
+        )
+        part = self.season["barcodeData"]["attack"]
+        cbValueForPart = int(
+            self.cb[
+                part["bitposition"] : -(
+                    len(self.cb) - part["bitposition"] - part["bitsize"]
+                )
+            ]
+        )
+        attack = self._deterministic_weighted_value(
+            part["min"], part["max"], part["factor"], cbValueForPart
+        )
+        self.specs = CardSpecs(name="", attack=attack, health=health, specs=None)
 
         print("calculatedCard")
         print(self)
@@ -256,19 +342,36 @@ class CardGenerator:
             data1 = response.read()
             string = data1.decode("utf-8")
             jsonObj = json.loads(string)
-            #print(jsonObj["images"][0])
+            # print(jsonObj["images"][0])
             conn.close()
-            if os.path.isdir('.'+self.season['ressourcesFolder']) is not True:
-                os.makedirs('.'+self.season['ressourcesFolder'])
-            with open('.'+self.season['ressourcesFolder']+'/'+self.centralImageId+".json", "w") as fout:
+            if os.path.isdir("." + self.season["ressourcesFolder"]) is not True:
+                os.makedirs("." + self.season["ressourcesFolder"])
+            with open(
+                "."
+                + self.season["ressourcesFolder"]
+                + "/"
+                + self.centralImageId
+                + ".json",
+                "w",
+            ) as fout:
                 json.dump(jsonObj, fout)
             file_content = jsonObj["images"][0]
             image_bytes = base64.b64decode(file_content)
             image = Image.open(BytesIO(image_bytes))
-            image.save("." + self.season['ressourcesFolder']+'/'+self.centralImageId+".png", format="PNG")
+            image.save(
+                "."
+                + self.season["ressourcesFolder"]
+                + "/"
+                + self.centralImageId
+                + ".png",
+                format="PNG",
+            )
             self._createImage()
-        except KeyError:
+        except KeyError as e:
             print("error http")
+            print(e)
+        except Exception as e:
+            print(e)
         print("request IA")
 
     async def _registerRequest(self):
@@ -279,23 +382,24 @@ class CardGenerator:
         return self.temporaryId
 
     def _assembleRequest(self):
-       # construction de la requete IA a partir de la base de requete
+        # construction de la requete IA a partir de la base de requete
         self.IArequest["prompt"] = self.prompt
         print(json.dumps(self.IArequest))
         self.IArequest["seed"] = self.userDatas.seed
 
     def _checkIfImageAlredyExist(self):
-        my_file = Path('.'+self.season['ressourcesFolder']+'/'+self.centralImageId+".png")
+        my_file = Path(
+            "." + self.season["ressourcesFolder"] + "/" + self.centralImageId + ".png"
+        )
         if my_file.is_file():
-            self.isNewImage=False
+            self.isNewImage = False
             return True
         else:
-            self.isNewImage=True
+            self.isNewImage = True
             return False
 
     def _finalizeCardOndb(self):
         print("set on db finalization of card")
-
 
     def toResponse(self, request) -> web.Response:
         print("to web response")
