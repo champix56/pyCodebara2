@@ -25,8 +25,9 @@ for season in seasons:
                 prompt['image_width'] =64
                 prompt['inference_steps' ]=1
             prompt['prompt']=cs[1]
-            prompt['seed']+=i
-            my_file = Path('.'+season['ressourcesFolder']+'/'+cs[0]+'_'+str(prompt['seed'])+".png")
+            #prompt['seed']+=i
+            prompt['seed']=i
+            my_file = Path('.'+season['ressourcesFolder']+'/'+str(season['seasonid'])+'_'+cs[0]+'_'+str(prompt['seed'])+".png")
             if not my_file.is_file():
                 try:
                     host = IMAGE_IA_GEN_REST_URL
