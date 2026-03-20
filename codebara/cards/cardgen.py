@@ -6,6 +6,7 @@ import http.client
 import json
 import math
 import os
+import asyncio
 from io import BytesIO
 from pathlib import Path
 import shutil
@@ -22,6 +23,8 @@ from codebara.config import (
     IMAGE_IA_GEN_ENDPOINT_GEN,
     IMAGE_IA_GEN_ENDPOINT_METHOD,
     IMAGE_IA_GEN_REST_URL,
+    OUTPUT_CARD_SIZE,
+    CARD_FILE_EXTENSION
 )
 #from codebara.seasons.season import seasonLoader
 from codebara.tools.common import build_seed, seededRandom, splitmix64
@@ -200,28 +203,29 @@ class CardGenerator:
         finalCode += finalCode[position : position + toAdd]
         self.cb = finalCode
 
-    async def generate(self, cb: str):
+    async def generate(self, cb: str)->int:
         print("ean13:" + cb)
         self.realcb = cb
         self.cb = cb
         self._barcodeStandardization(self.promptUserSeed)
         self._calculate()
+        self._assembleRequest()
         self.temporaryId = await self._registerRequest()
         self.cardId=self.temporaryId
         self._checkIfImageAlredyExist()
         if not self.isNewImage:
-            self._createImage()
+            await self._createImage()
         else:
-            self._assembleRequest()
             # renderPool.push(self._syncCreateCard)
             if TEST is False:
-                t = Thread(target=self._syncCreateCard)
+                t = Thread(target=self._asyncCreateCard)
                 t.start()
             else:
-                self._syncCreateCard()
+                await self._syncCreateCard()
         return self.temporaryId
-
-    def _createImage(self):
+    def _asyncCreateCard(self):
+        asyncio.run( self._syncCreateCard())
+    async def _createImage(self):
         print("create image")
         creator = CardImageCreator(self.userDatas.uid, self.season)
         loc = creator.create(
@@ -230,14 +234,14 @@ class CardGenerator:
         )
         zipfilename=self.userDatas.serverDataLoc+'/'+str(self.cardId)
         folder=zipfilename
-        zipfilename+=".tar.gz"
+        zipfilename+=CARD_FILE_EXTENSION#".tar.gz"
         p=Path(folder)
         if not p.is_dir():
             p.mkdir(parents=True)
         shutil.move(loc,folder+'/front.png')
         img=Image.open(folder+'/front.png')
         #img=img.resize((int(img.width/1.2),int(img.height/1.2)))
-        img.thumbnail((1185,2048))
+        img.thumbnail(OUTPUT_CARD_SIZE)
         img.save(folder+'/front.png', optimize=True)
         hash={"front":getSha256FromFile(folder+'/front.png')}
         shutil.copyfile("." + self.season["ressourcesFolder"] + "/" + self.centralImageId + ".png", folder+'/perso.png')
@@ -246,13 +250,29 @@ class CardGenerator:
         img.save(folder+'/perso.png', optimize=True)
         hash["perso"]=getSha256FromFile(folder+'/perso.png')
         with open(folder+"/datas.json","w") as fout:
-            json.dump(self.specs.__dict__, fout)
+            json.dump(self.specs.todict(), fout)
         hash["datas"]=getSha256FromFile(folder+"/datas.json")
         img=Image.open("." + self.season["deck"]['backUrl'])
         #img=img.resize((int(img.width/1.2),int(img.height/1.2)))
-        img.thumbnail((int(img.width/3),int(img.height/3)))
+        img.thumbnail(OUTPUT_CARD_SIZE)
         img.save(folder+'/back.png', optimize=True)
-        hash["datas"]=getSha256FromFile(folder+"/back.png")
+        hash["back"]=getSha256FromFile(folder+"/back.png")
+        cardZone=json.loads(json.dumps(self.season['deck']))
+        cardZone['frontUrl']='front.png'
+        cardZone['backUrl']='back.png'
+        cardZone['persoUrl']='perso.png'
+        xratio=cardZone['width']/OUTPUT_CARD_SIZE[0]
+        yratio=cardZone['height']/OUTPUT_CARD_SIZE[1]
+        for key, value in cardZone['positions'].items():
+            value['x']=int(value['x']/xratio)+1
+            value['y']=int(value['y']/yratio)+1
+            if value.get('width'):
+                value['width']=int(value['width']/xratio)+1
+            if value.get('height'):
+                value['height']=int(value['height']/yratio)+1
+            print (key, value)
+        with open(folder+"/deck.json","w") as fout:
+            json.dump(cardZone, fout)
         with open(folder+"/hashs.json","w") as fout:
             json.dump(hash, fout)
         with tarfile.open( zipfilename, "w:xz") as tar:
@@ -262,7 +282,7 @@ class CardGenerator:
                 os.remove(folder+'/'+name)
         tar.close()
         os.rmdir(folder)
-        register_requestCardLocAndHash(cardid=self.cardId, hash=getSha256FromFile(zipfilename),fileloc=zipfilename)
+        await register_requestCardLocAndHash(userid=self.userDatas.uid, cardid=self.cardId, hash=getSha256FromFile(zipfilename),fileloc=zipfilename)
         #hash={"archive":getSha256FromFile(zipfilename) }
         #print("output:" + zipfilename)
         #print("hash:",hash)
@@ -322,12 +342,84 @@ class CardGenerator:
         attack = self._deterministic_weighted_value(
             part["min"], part["max"], part["factor"], cbValueForPart
         )
-        self.specs = CardSpecs(name="", attack=attack, health=health, specs=None)
+        #calcul des specials specs
+        specials=[]
+        seasonSpecials=self.season["barcodeData"]["specials"]
+        for bitp in seasonSpecials["bitpositions"]:
+
+
+            cbValueForPart = int(
+                self.cb[
+                    bitp : -(
+                        len(self.cb) - bitp - seasonSpecials["bitsize"]
+                    )
+                ]
+            )
+            valueindex = self._deterministic_weighted_choice(
+                seasonSpecials["values"], cbValueForPart
+            )
+            special=seasonSpecials["values"][valueindex]
+            if special.get('name') is not None:
+                sattack:int|None=attack+special.get('attack') if special.get('attack') is not None else None
+                shealth:int|None=special.get('health') if special.get('health') is not None else None
+                if special['type']=="attack" :
+                    if sattack is None:
+                        cbValueForPart = int(
+                            self.cb[
+                                special["bitposition"] : -(
+                                    len(self.cb) - special["bitposition"] - special["bitsize"]
+                                )
+                            ]
+                        )
+                        sattack =attack+ self._deterministic_weighted_value(
+                            special["min"], special["max"], special["factorValue"], cbValueForPart
+                        )
+                elif special['type']=='health':
+                    if shealth is None:
+                        cbValueForPart = int(
+                            self.cb[
+                                special["bitposition"] : -(
+                                    len(self.cb) - special["bitposition"] - special["bitsize"]
+                                )
+                            ]
+                        )
+                        shealth = self._deterministic_weighted_value(
+                            special["min"], special["max"], special["factorValue"], cbValueForPart
+                        )
+                else:
+                    if shealth is None:
+                        cbValueForPart = int(
+                            self.cb[
+                                special["bitpositions"][0] : -(
+                                len(self.cb) - special["bitpositions"][0] - special["bitsizes"][0]
+                                )
+                            ]
+                        )
+                        shealth = self._deterministic_weighted_value(
+                            special["mins"][0], special["maxs"][0], special["factorValues"][0], cbValueForPart
+                        )
+                    if sattack is None:
+                        cbValueForPart = int(
+                            self.cb[
+                                special["bitpositions"][1] : -(
+                                len(self.cb) - special["bitpositions"][1] - special["bitsizes"][1]
+                                )
+                            ]
+                        )
+                        sattack =attack+ self._deterministic_weighted_value(
+                            special["mins"][1], special["maxs"][1], special["factorValues"][1], cbValueForPart
+                        )
+                sspec=SpecialSpec(name=special['name'], attack=sattack, health=shealth, turn=special['turn'] )
+                specials.append(sspec)
+        print(specials)
+        if len(specials)==0:
+            specials=None
+        self.specs = CardSpecs(cid=-1, name="", attack=attack, health=health, specials=specials)
 
         print("calculatedCard")
         print(self)
 
-    def _syncCreateCard(self):
+    async def _syncCreateCard(self):
         try:
             host = IMAGE_IA_GEN_REST_URL
             conn = http.client.HTTPConnection(host)
@@ -366,18 +458,21 @@ class CardGenerator:
                 + ".png",
                 format="PNG",
             )
-            self._createImage()
+            await self._createImage()
         except KeyError as e:
             print("error http")
             print(e)
-        except Exception as e:
+        except ConnectionRefusedError as e:
+            print('IA SERVER OFF')
             print(e)
+        """except Exception as e:
+            print(e)"""
         print("request IA")
 
-    async def _registerRequest(self):
+    async def _registerRequest(self)->int:
         print("get temporaryId")
         self.temporaryId = await register_requestCard(
-            userid=self.userDatas.uid, request=self.IArequest
+            userid=self.userDatas.uid, request=self.IArequest, seasonid=self.season["seasonid"]
         )
         return self.temporaryId
 
