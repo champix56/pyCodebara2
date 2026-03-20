@@ -15,6 +15,7 @@ class HttpErrors(Enum):
     ERROR_REQUEST=2
     ERROR_INVALID_METHOD=3
     ERROR_INVALID_ROUTE=4
+    ERROR_NOT_IMPLEMENTED_YET=5
 
 class  HttpOutputResponse():
     def __init__(self,responseStatus:ResponseStatus|None=None, body:dict|None=None,message:str|None=None):
