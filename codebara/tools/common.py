@@ -1,7 +1,21 @@
 import math
+import hashlib
+#from io import StringIO
 from typing import Final
-
-
+def getSha256OfStr(strToHash:str)->str:
+    hasher=hashlib.new('sha256')
+    #bufferedvalue=StringIO( strToHash)
+    hasher.update(strToHash.encode())
+    return hasher.hexdigest()
+def getSha256FromFile(path:str, bufSize:int=1024)->str:
+    hasher=hashlib.new('sha256')
+    with open(path, 'rb') as f:
+        while True:
+            data = f.read(bufSize)
+            if not data:
+                break
+            hasher.update(data)
+    return hasher.hexdigest()
 def seededRandom(
     seed1: int, seed2: int, min: int = 1, max: int = 100000, renderProb=0.5
 ):
