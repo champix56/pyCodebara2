@@ -6,11 +6,11 @@
     "seasonName": "beta-robots",
     "startTime": "2025-01-01T00:00:01",
     "endTime":null,
-    "ressourcesFolder": "/season/beta-robots/genbase",
+    "ressourcesFolder": "/seasons/beta-robots/gen512",
     "seasonSeed": 2341,
     "deck": {
-        "frontUrl": "/season/standard/front.png",
-        "backUrl": "/season/standard/back.png",
+        "frontUrl": "/seasons/standard/front.png",
+        "backUrl": "/seasons/standard/back.png",
         "width": 2370,
         "height": 4096,
         "positions": {
@@ -64,10 +64,16 @@
                 "y": 3996,
                 "height": 70,
                 "color": "#FAFAFAFA"
+            },
+            "power":{
+                "x":3900,
+                "y":60,
+                "height":50,
+                "color":"#FAFAFAFA"
             }
         }
     },
-    "promptBase": "style cartoon; fun; traits simples",
+    "promptBase": "style réaliste; robot",
     "barcodeData": {
         "prompt": [
             {
@@ -79,18 +85,18 @@
                 "values": [
                     {
                         "id": 0,
-                        "value": "jungle",
+                        "value": "salle des machines",
                         "factor": 0.7
                     },
                     {
                         "id": 1,
                         "factor": 0.7,
-                        "value": "town"
+                        "value": "bureau"
                     },
                     {
                         "id": 2,
                         "factor": 0.7,
-                        "value": "desert"
+                        "value": "salon de maison"
                     }
                 ]
             },
@@ -105,27 +111,22 @@
                     {
                         "id": 0,
                         "factor": 0.7,
-                        "value": " funny elephant"
+                        "value": "Ordinateur"
                     },
                     {
                         "id": 1,
                         "factor": 0.7,
-                        "value": " funny aligator"
+                        "value": "Humanoïde"
                     },
                     {
                         "id": 2,
                         "factor": 0.7,
-                        "value": " funny fox"
+                        "value": "avion robot"
                     },
                     {
                         "id": 3,
                         "factor": 0.7,
-                        "value": " wicked mole"
-                    },
-                    {
-                        "id": 4,
-                        "factor": 0.7,
-                        "value": " funny hypnotizing snake"
+                        "value": "Vehicule"
                     }
                 ]
             },
@@ -212,19 +213,21 @@
             "bitpositions": [
                 12,
                 6,
-                40
+                63
             ],
-            "factor": 0.55,
-            "factorValue": 0.66,
+            "bitsize":2,
             "values": [
                 {
                     "id": 0,
                     "min": 15,
-                    "max": 30,
+                    "max": 55,
                     "type": "health",
                     "name": "nouvelle petite amie",
-                    "attack": 30,
-                    "turn": 1
+                    "turn": 1,
+                    "factor": 0.2,
+                    "bitposition":28,
+                    "bitsize":2,
+                    "factorValue": 0.66
                 },
                 {
                     "id": 1,
@@ -232,8 +235,54 @@
                     "max": 30,
                     "type": "attack",
                     "name": "éclairs",
+                    "turn": 1,
+                    "factor": 0.4,
+                    "bitposition":13,
+                    "bitsize":2,
+                    "factorValue": 0.66
+                }
+                ,
+                {
+                    "id": 2,
+                    "min": 5,
+                    "max": 7,
+                    "type": "attack",
+                    "name": "matiere fecale",
                     "attack": 30,
-                    "turn": 1
+                    "turn": 3,
+                    "factor": 0.21,
+                    "bitposition":39,
+                    "bitsize":2,
+                    "factorValue": 0.66
+
+                },
+                {
+                    "id": 3,
+                    "mins": [27,9],
+                    "maxs": [67,20],
+                    "type": "healthAndAttack",
+                    "name": "Energy drink",
+                    "turn": 1,
+                    "factor": 0.3,
+                    "bitpositions":[69,49],
+                    "bitsizes":[2,2],
+                    "factorValues": [0.66,0.39]
+                },
+                {
+                    "id": 4,
+                    "min": 28,
+                    "max": 41,
+                    "type": "health",
+                    "name": "220V vers 380",
+                    "turn": 1,
+                    "factor": 0.2,
+                    "bitposition":3,
+                    "bitsize":2,
+                    "factorValue": 0.66
+                },
+                {
+                    "id": 5,
+                    "factor": 0.8
                 }
             ]
         }
