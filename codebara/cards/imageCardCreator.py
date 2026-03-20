@@ -65,10 +65,6 @@ class CardImageCreator:
             * seededRandom(1000, int(random.random() * 1000))
         )
         self.creatorid = uid
-        """if specs is None:
-            self.specs = CardSpecs()
-        else:
-            self.specs = specs"""
         if season is None:
             self.season = seasonLoader()
         else:
@@ -145,10 +141,10 @@ class CardImageCreator:
         self.outLoc = "/" + str(self.id)
 
     def _resizeAndSave(self,)->str:
-        self.tmpImage.thumbnail((1185,2048), Image.Resampling.LANCZOS)
+        #self.tmpImage.thumbnail((1185,2048), Image.Resampling.LANCZOS)
         #self.tmpImage=self.tmpImage.convert('RGB')
         outputFileName="." + self.outLoc+ ".png"
-        self.tmpImage.save(outputFileName, "PNG",quality=1)
+        self.tmpImage.save(outputFileName, "PNG",quality=9)
         print(outputFileName)
         return outputFileName
     def create(self, specs: CardSpecs, centralImageLoc:str, outputFilename:str|None=None)->str:
@@ -267,7 +263,7 @@ class CardImageCreator:
         font = ImageFont.truetype(
             "./seasons/standard/GalaferaMedium.ttf", float(str(self.specialsSpecLoc.h))
         )
-        for spec in self.specs.specs:
+        for spec in self.specs.specials:
             self._printSpecialSpec(
                 draw=draw, spec=spec, x=self.specialsSpecLoc.x, y=positionY, color=self.specialsSpecLoc.color, font=font
             )
@@ -283,9 +279,14 @@ class CardImageCreator:
         color: str,
         font: ImageFont.FreeTypeFont,
     ):
+        string=str(spec.turn)+"x "+spec.name
+        if spec.health is not None:
+            string+='  health: '+str(spec.health)
+        if spec.attack is not None:
+            string+='  attack: '+str(spec.attack)
         draw.text(
             (x, y),
-            spec.name,
+            string,
             color,
             font=font,
         )
