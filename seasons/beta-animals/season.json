@@ -6,11 +6,11 @@
     "seasonName": "beta-animals",
     "startTime": "2025-01-01T00:00:01",
     "endTime":null,
-    "ressourcesFolder": "/season/beta-animals/genbase",
+    "ressourcesFolder": "/seasons/beta-animals/gen512",
     "seasonSeed": 2341,
     "deck": {
-        "frontUrl": "/season/standard/front.png",
-        "backUrl": "/season/standard/back.png",
+        "frontUrl": "/seasons/standard/front.png",
+        "backUrl": "/seasons/standard/back.png",
         "width": 2370,
         "height": 4096,
         "positions": {
