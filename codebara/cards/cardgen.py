@@ -211,6 +211,7 @@ class CardGenerator:
         self._calculate()
         self._assembleRequest()
         self.temporaryId = await self._registerRequest()
+        self.specs.id=self.temporaryId
         self.cardId=self.temporaryId
         self._checkIfImageAlredyExist()
         if not self.isNewImage:
