@@ -22,10 +22,10 @@ async def register_requestCardLocAndHash(userid:int,cardid:str,fileloc:str,hash:
 async def check_cardHash(cardid:str,hash:str)->bool:
     sql=MySQLClient()
     await sql.connect()
-    sqlReq="SELECT id FROM  `cdb`.`card` WHERE id="+cardid+" and cardHash='"+hash+"'"
+    sqlReq="SELECT id FROM  `cdb`.`card` WHERE id="+str(cardid)+" and cardHash='"+hash+"'"
     res=await sql.execute(sqlReq)
     await sql.close()
-    if res[0] is not None:
+    if len(res)>0:
         return True
     else:
         return False
