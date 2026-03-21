@@ -23,12 +23,13 @@ class  HttpOutputResponse():
         self.statusText = respStatus.name
         self.status = respStatus.value
         self.ok=False if respStatus.value>=400 else True
+        self.body=body
     def toJson(self)->str:
         tmpDict={
             "statusText":self.statusText,
             "status":self.status,
             "ok":self.ok,
-            "body":self.body,
+            "body":json.dumps(self.body),
             "message":self.message
         }
         strtmp=StringIO()
@@ -43,8 +44,11 @@ class  HttpOutputResponse():
     #    return {"ok":self.ok,"status":self.status,"message":self.message,"body":self.body,"statusText":self.statusText}
     def toResponse(self)->web.Response:
         message:str|None=None if self.body is not None else json.dumps({"message":self.message})
-        return web.Response( status=self.status, body=self.body, text=message   , headers=())
-        
+        if self.body is not None:
+            return web.json_response(self.body)
+            #return web.Response( status=self.status, body= json.dumps(self.body)  , headers=())
+        else:
+            return web.Response( status=self.status, text=message   , headers=())
 def assembleHttpRequestError(error:HttpErrors,request: web.Request, message:str|None=None)->HttpOutputResponse:
     retval= HttpOutputResponse()
     status:ResponseStatus|None=None
@@ -67,7 +71,7 @@ def assembleHttpRequestError(error:HttpErrors,request: web.Request, message:str|
     retval.status=status.value    
     retval.ok=False
     if message is not None:
-        retval.message+=";"+message
+        retval.message=((retval.message+";")if retval.message is not None else '' )+message
     return retval
 
 """
