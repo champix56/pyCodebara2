@@ -28,12 +28,14 @@ class CardSpecs:
         self.health=health
         self.rarity=rarity
         self.power=power
+        self.id=cid
         self.specials=specials if specials is not None else []
     def todict(self)->dict:
         tempDictSpecs=[]
         for spec in self.specials:
             tempDictSpecs.append(spec.__dict__)
         return {
+            "id":self.id,
             "name":self.name,
             "attack":self.attack,
             "health":self.health,
@@ -69,4 +71,5 @@ class Card (CardSpecs):
         return super().toJson()
 
 async def checkCardIntegrity(cid:int, hash:str)-> bool:
-    return await check_cardHash(cardid=cid, hash=hash)
+   resp=await check_cardHash(cardid=cid, hash=hash)
+   return resp
