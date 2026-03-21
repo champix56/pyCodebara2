@@ -264,6 +264,8 @@ class CardGenerator:
         cardZone['persoUrl']='perso.png'
         xratio=cardZone['width']/OUTPUT_CARD_SIZE[0]
         yratio=cardZone['height']/OUTPUT_CARD_SIZE[1]
+        cardZone['width']=OUTPUT_CARD_SIZE[0]
+        cardZone['height']=OUTPUT_CARD_SIZE[1]
         for key, value in cardZone['positions'].items():
             value['x']=int(value['x']/xratio)+1
             value['y']=int(value['y']/yratio)+1
