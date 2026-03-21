@@ -27,7 +27,16 @@ def random_ean13():
     code12 = ''.join(str(random.randint(0, 9)) for _ in range(12))
     return code12 + compute_ean13_checksum(code12)
 
+#gen only one card with always same cb
 async def cardgen()->str:
+    u=await getSQLUserCoreDatas(666)
+    seasons=seasonsFilter()
+    if u is None:
+        return "error"
+    else :
+        cardgen=CardGenerator(seasons, u)
+        return str(await cardgen.generate(cb='64527486384936'))
+async def cardgens()->str:
     u=await getSQLUserCoreDatas(666)
     seasons=seasonsFilter()
     if u is None:
@@ -40,32 +49,4 @@ async def cardgen()->str:
             print(await cardgen.generate(cb=random_ean13()))
     return 'end'
 
-print(asyncio.run( cardgen()))
-#print(renderPool.size)
-#user=User(666,999,'GOD', 'god@codebara.com',99999999)
-#u=user.parentInstance()
-
-
-
-""" image car gen force central image"""
-"""from codebara.cards.imageCardCreator import CardImageCreator
-from codebara.cards import CardSpecs, SpecialSpec
-from codebara.seasons.season import seasonLoader
-sSpecs=[SpecialSpec(name="abc"),SpecialSpec(name="def"),]
-spec=CardSpecs("Mon premier Codebara", 89,65, sSpecs)
-season=seasonLoader()
-card = CardImageCreator(uid=23432,season=season )
-locfile=card.create(specs=spec, centralImageLoc=None)"""
-
-""" ZIP Compare with one file
-import zipfile
-
-zip = zipfile.ZipFile("./stuffBZ2.zip", "w",compression= zipfile.ZIP_BZIP2, compresslevel=9)
-zip.write('./c.png')
-zip.close()
-zip = zipfile.ZipFile("./stuffLZMA.zip", "w",compression= zipfile.ZIP_LZMA, compresslevel=9)
-zip.write('./c.png')
-zip.close()
-zip = zipfile.ZipFile("./stuffDEF.zip", "w",compression= zipfile.ZIP_DEFLATED, compresslevel=9)
-zip.write('./c.png')
-zip.close()"""
+asyncio.run( cardgen())
