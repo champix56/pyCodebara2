@@ -103,9 +103,9 @@ class AsyncHTTPServer:
             self.logger.debug("HEADER %s=%s", k, v)
         #await routes.get(request,self.getQueryValue(request=request))
         #resp=
-        await noBodyRoute(request=request,queryArray=self.getQueryValue(request=request))
+        resp=await noBodyRoute(request=request,queryArray=self.getQueryValue(request=request))
         self.logger.info("end %s", request.method)
-        return web.Response(text="OK")
+        return resp#web.Response(text="OK")
 
     async def handle_with_body(self, request: web.Request) -> web.Response:
         body = await request.read()
