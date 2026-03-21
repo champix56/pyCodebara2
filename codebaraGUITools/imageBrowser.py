@@ -8,9 +8,11 @@ import tarfile
 import os
 import json
 import pathlib
+import asyncio
 from PIL import Image
 from codebara.config import CARD_FILE_EXTENSION
 from codebara.tools import getSha256FromFile
+from codebara.cards.card import checkCardIntegrity
 # import filedialog module
 from tkinter import filedialog
 TEMP_DIRECTORY='./tmp/gui/'
@@ -31,7 +33,9 @@ class ImageBrowser:
         quit()
     def destroyTemp(self):
         print('destroy temp')
-    def selectOnList(self,a):
+    def asyncSelectOnList(self,a):
+        asyncio.run(self.selectOnList(a))
+    async def selectOnList(self,a):
         print('select onList')
         selected:str=self.listFiles.selection_get()
         if selected=='..':
@@ -45,8 +49,8 @@ class ImageBrowser:
                 self._refreshList()
             #elif selected.endswith('tar.gz'):
             elif selected.endswith(CARD_FILE_EXTENSION) or selected.endswith('tar.gz'):
-                self._openCardFile(self.directory+'/'+selected)
-    def _openCardFile(self, filename):
+                await self._openCardFile(self.directory+'/'+selected)
+    async def _openCardFile(self, filename):
         print('open card')
         folder='./tmp/GUI'
         with tarfile.open(filename,'r') as f:
@@ -54,8 +58,18 @@ class ImageBrowser:
             if p.is_dir() is False:
                p.mkdir(parents=True)
             f.extractall(path=p)
+            
         hashsResults={'front':False,'perso':False,'back':False, 'datas':False}
-        filehash=getSha256FromFile(filename)
+        try:
+            filehash=getSha256FromFile(filename)
+            with open(folder+'/datas.json') as d:
+                datas=json.load(d)
+            tarIsOK=await checkCardIntegrity(cid=datas['id'], hash=filehash)
+            self.fileCheck.config(background='GREEN' if tarIsOK else 'RED')
+        except Exception as e:
+            print('no capacity to check cdz file hash', e)
+            self.fileCheck.config(background='RED')
+
         print(filehash)
         with open(folder+'/hashs.json') as j:
             #s:str=j.read()
@@ -66,7 +80,6 @@ class ImageBrowser:
                 'back': getSha256FromFile(folder+'/back.png')==hash['back'],
                 'datas':getSha256FromFile(folder+'/datas.json')==hash['datas']
             }
-            #self.fileCheck.config(background='GREEN' if hashsResults['front'] else 'RED')
             self.frontCheck.config(background='GREEN' if hashsResults['front'] else 'RED')
             self.backCheck.config(background='GREEN' if hashsResults['back'] else 'RED')
             self.persoCheck.config(background='GREEN' if hashsResults['perso'] else 'RED')
@@ -129,7 +142,7 @@ class ImageBrowser:
         centralFame.place(relx=0, rely=0.1, relwidth=1,relheight=0.8)"""
 
         self.listFiles=Listbox(self.window, font=("Helvetica", 15))
-        self.listFiles.bind('<Double-1>', self.selectOnList)
+        self.listFiles.bind('<Double-1>', self.asyncSelectOnList)
         self.listFiles.place(x=0.08,y=55, relwidth=0.3,relheight=0.87 )
         self.centralRightFrame=Frame(
             master=self.window, bd=3, cursor='hand2', 
