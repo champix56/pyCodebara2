@@ -1,3 +1,3 @@
-from .networkResponses import assembleHttpRequestError, HttpErrors, HttpOutputResponse
+from .networkResponses import assembleHttpRequestError, HttpErrors, HttpOutputResponse, ResponseStatus
 
-__all__=["assembleHttpRequestError", "HttpErrors","HttpOutputResponse"]
+__all__=["assembleHttpRequestError", "HttpErrors","HttpOutputResponse","ResponseStatus"]
