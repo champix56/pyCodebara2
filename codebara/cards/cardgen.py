@@ -1,5 +1,3 @@
-"""from threading import Thread"""
-
 import base64
 import datetime
 import http.client
@@ -16,7 +14,7 @@ import tarfile
 import hashlib
 from aiohttp import web
 from PIL import Image
-from codebara.cards.cardMysql import register_requestCard, register_requestCardLocAndHash
+from codebara.cards.cardMysql import register_requestCard, update_registered_requestCard
 from codebara.cards.imageCardCreator import CardImageCreator, CardSpecs, SpecialSpec
 from codebara.config import (
     IMAGE_IA_GEN_BODY_BASE,
@@ -28,7 +26,7 @@ from codebara.config import (
 )
 #from codebara.seasons.season import seasonLoader
 from codebara.tools.common import build_seed, seededRandom, splitmix64
-from codebara.tools import getSha256FromFile, getSha256OfStr
+from codebara.tools import getSha256FromFile
 from codebara.users import user
 TEST = True
 # from codebara.errors import HttpOutputResponse
@@ -285,10 +283,8 @@ class CardGenerator:
                 os.remove(folder+'/'+name)
         tar.close()
         os.rmdir(folder)
-        await register_requestCardLocAndHash(userid=self.userDatas.uid, cardid=self.cardId, hash=getSha256FromFile(zipfilename),fileloc=zipfilename)
-        #hash={"archive":getSha256FromFile(zipfilename) }
-        #print("output:" + zipfilename)
-        #print("hash:",hash)
+        await update_registered_requestCard(specs=self.specs, cardid=self.cardId, hash=getSha256FromFile(zipfilename),fileloc=zipfilename)
+
 
     def _calculate(self):
         # calcul de la saison
