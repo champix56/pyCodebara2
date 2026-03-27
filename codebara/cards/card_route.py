@@ -4,7 +4,7 @@ from .cardgen import CardGenerator
 #from codebara.tools.common import seededRandom
 from codebara.seasons import seasonsFilter
 from codebara.users import UserCoreDatas
-from codebara.cards.card import checkCardIntegrity
+from codebara.cards.cardMysql import checkCardIntegrity
 
 import json
 async def cardRoutes(request:web.Request,queryArray:tuple,body:dict|None=None)->web.Response:
