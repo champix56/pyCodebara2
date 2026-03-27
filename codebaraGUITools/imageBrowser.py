@@ -9,7 +9,8 @@ import os
 import json
 import pathlib
 import asyncio
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFont
+
 from codebara.config import CARD_FILE_EXTENSION
 from codebara.tools import getSha256FromFile
 from codebara.cards.cardMysql import checkCardIntegrity
@@ -85,8 +86,21 @@ class ImageBrowser:
             self.persoCheck.config(background='GREEN' if hashsResults['perso'] else 'RED')
             self.datasCheck.config(background='GREEN' if hashsResults['datas'] else 'RED')
             print(hashsResults)
-
         image = Image.open('./tmp/GUI/front.png')
+        with open('./tmp/GUI/deck.json') as fin:
+            deck=json.load(fin)
+            nameDeck=deck['positions']['name']
+            draw = ImageDraw.Draw(image)
+            font = ImageFont.truetype(
+                "./seasons/standard/GalaferaMedium.ttf", nameDeck['height']
+            )
+            draw.text(
+                (nameDeck['x'], nameDeck['y']),
+                datas['name'],
+                nameDeck['color'],
+                font=font,
+            )
+        fin.close()
         image.resize((400, 700)).save('./tmp/GUI/front.png')
         imagef = PhotoImage(file='./tmp/GUI/front.png')        
         self.imagef_label.config(image=imagef)
