@@ -1,6 +1,6 @@
 import json
 from io import TextIOWrapper
-from codebara.cards.cardMysql import check_cardHash
+#from codebara.cards.cardMysql import check_cardHash
 class SpecialSpec:
     name:str
     attack:int=0
@@ -55,7 +55,7 @@ class Card (CardSpecs):
     seed:int
     def __init__(self,id:int,seasonid:int,promptid:str,seed:int,ownerid:int,creatorid:int,name:str,imageFilename:str,centralImageFilename:str,attack:int=0,
                 health:int=0,specs:list[SpecialSpec]|None=None):
-        super().__init__(name,attack,health,specs)
+        super().__init__(id,name,attack,health,specs)
         self.id=id
         self.seed=seed
         self.creatorid=creatorid
@@ -70,6 +70,3 @@ class Card (CardSpecs):
     def toCardSpecs(self):
         return super().toJson()
 
-async def checkCardIntegrity(cid:int, hash:str)-> bool:
-   resp=await check_cardHash(cardid=cid, hash=hash)
-   return resp
