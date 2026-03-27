@@ -16,17 +16,18 @@ async def cardRoutes(request:web.Request,queryArray:tuple,body:dict|None=None)->
             if pathSplited[2].isdigit():
                 print("getCard")
                 return assembleHttpRequestError(HttpErrors.ERROR_NOT_IMPLEMENTED_YET, request=request)
-            match pathSplited[2]:
-                case 'check':
-                    print('checkcard')
-                    try:
-                        datas=json.loads(request.headers['datas'])
-                        response=HttpOutputResponse(responseStatus=ResponseStatus.OK, body={"isChecksumGood":await checkCardIntegrity(cid=datas['cid'], hash=datas['hash'])},message="card is OK")
-                        print(response)
-                    except KeyError as e:
-                        print(e)
-                        response=assembleHttpRequestError(error=HttpErrors.ERROR_REQUEST, request=request)
-            #id=pathSplited[1]
+            else:
+                match pathSplited[2]:
+                    case 'check':
+                        print('checkcard')
+                        try:
+                            datas=json.loads(request.headers['datas'])
+                            response=HttpOutputResponse(responseStatus=ResponseStatus.OK, body={"isChecksumGood":await checkCardIntegrity(cid=datas['cid'], hash=datas['hash'])},message="card is OK")
+                            print(response)
+                        except KeyError as e:
+                            print(e)
+                            response=assembleHttpRequestError(error=HttpErrors.ERROR_REQUEST, request=request)
+                #id=pathSplited[1]
         case ('POST'):
             # comment: 
             seasons = seasonsFilter()
