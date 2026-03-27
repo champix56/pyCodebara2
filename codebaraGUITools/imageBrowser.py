@@ -12,7 +12,7 @@ import asyncio
 from PIL import Image
 from codebara.config import CARD_FILE_EXTENSION
 from codebara.tools import getSha256FromFile
-from codebara.cards.card import checkCardIntegrity
+from codebara.cards.cardMysql import checkCardIntegrity
 # import filedialog module
 from tkinter import filedialog
 TEMP_DIRECTORY='./tmp/gui/'
