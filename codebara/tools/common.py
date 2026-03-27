@@ -2,6 +2,10 @@ import math
 import hashlib
 #from io import StringIO
 from typing import Final
+import string
+import random
+def str_random(size=6, chars=string.ascii_uppercase + string.digits):
+    return ''.join(random.choice(chars) for _ in range(size))
 def getSha256OfStr(strToHash:str)->str:
     hasher=hashlib.new('sha256')
     #bufferedvalue=StringIO( strToHash)
