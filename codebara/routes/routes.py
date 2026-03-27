@@ -1,6 +1,7 @@
 from aiohttp import web
 from codebara.errors import assembleHttpRequestError, HttpErrors
 from codebara.cards import  cardRoutes
+from codebara.users import userRoutes
 async def noBodyRoute(request:web.Request,queryArray:tuple)->web.Response:
     response=assembleHttpRequestError(HttpErrors.ERROR_REQUEST,request=request)
     match request.path.split('/')[1]:
@@ -12,4 +13,6 @@ async def bodyRoute(request:web.Request,body:dict,queryArray:tuple)->web.Respons
     match request.path.split('/')[1]:
         case 'card':
             response=await cardRoutes(request=request,body=body,queryArray=queryArray)
+        case 'user':
+            response=await userRoutes(request=request,body=body,queryArray=queryArray)
     return response
