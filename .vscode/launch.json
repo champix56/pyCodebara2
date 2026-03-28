@@ -53,6 +53,16 @@
       "python": "${workspaceFolder}/venv/bin/python",
       "console": "integratedTerminal",
       "justMyCode": true
+    },
+    {
+      "name": "testFile",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${file}",
+      //"program": "test2.py",
+      "python": "${workspaceFolder}/venv/bin/python",
+      "console": "integratedTerminal",
+      "justMyCode": true
     }
   ]
 }
