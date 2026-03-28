@@ -9,7 +9,7 @@ async def userRoutes(request:web.Request,queryArray:tuple,body:dict|None=None)->
         print(pathSplited)
         match (request.method):
             case ('GET'):
-                if pathSplited[2].isdigit():
+                if len(pathSplited)>2 and pathSplited[2].isdigit():
                     print("getUserDatas for all")
                     #return assembleHttpRequestError(HttpErrors.ERROR_NOT_IMPLEMENTED_YET, request=request)
                 else:
@@ -19,14 +19,14 @@ async def userRoutes(request:web.Request,queryArray:tuple,body:dict|None=None)->
                             if datas['API_TOKEN'] is not None and datas['API_REQUEST_TOKEN'] is not None:
                                 #auth by token
                                 #response=HttpOutputResponse(responseStatus=ResponseStatus.OK, body={"isChecksumGood":await checkCardIntegrity(cid=datas['cid'], hash=datas['hash'])},message="card is OK")
-                                tokens=await authUserSQLByTokens(request.headers['API_TOKEN'], request.headers['API_REQUEST_TOKEN'])
+                                tokens=await authUserSQLByTokens(datas['API_TOKEN'], datas['API_REQUEST_TOKEN'])
                                 if tokens is not None:
                                     response=HttpOutputResponse(body=tokens)
                                     print('API AUTH')
                             elif datas['mail'] is not None and datas['pass'] is not None:
                                 #auth by log/pass
                                 print("auth LOG/PASS")
-                                tokens=await authUser(request.headers['mail'], request.headers['pass'])
+                                tokens=await authUser(datas['mail'], datas['pass'])
                                 if tokens is not None:
                                     response=HttpOutputResponse(body=tokens)
                                 
@@ -35,7 +35,8 @@ async def userRoutes(request:web.Request,queryArray:tuple,body:dict|None=None)->
                     #creation de user
                     print("create user")
                     if body is not None:
-                        tokens=await createUser(body['mail'])
+                        decodeBody=json.loads(body)
+                        tokens=await createUser(decodeBody['mail'])
                         response=HttpOutputResponse(body=tokens)
                 else:
                     print('other post')
