@@ -1,6 +1,6 @@
 from enum import Enum, IntFlag
 from mysql_core import MySQLClient
-from .user import UserCoreDatas
+from .user_types import UserCoreDatas
 from codebara.tools.common import  str_random, getSha256OfStr
 async def getSQLUserCoreDatas(uid:int)->UserCoreDatas|None:
     sql=MySQLClient()
@@ -37,7 +37,7 @@ async def createSQLUser(mail:str, password:str)->dict|None:
 class TokenTypes(IntFlag):
     API_TOKEN=1<<0
     API_REQUEST_TOKEN=1<<1
-    API_BOTH=1<<0&1<<1
+    API_BOTH=1<<0|1<<1
 async def resetTokens(uid:int,tokenTypes: TokenTypes=TokenTypes.API_BOTH ):#->dict|None:
     ret={}
     sqlReq="UPDATE user SET "
@@ -45,7 +45,7 @@ async def resetTokens(uid:int,tokenTypes: TokenTypes=TokenTypes.API_BOTH ):#->di
         apiToken=getSha256OfStr(str_random(64))
         sqlReq+="`API_token`='"+apiToken+"' "
         ret['API_TOKEN']=apiToken
-    if tokenTypes&TokenTypes.API_BOTH:
+    if tokenTypes>2:
         sqlReq+=' AND '
     if tokenTypes&TokenTypes.API_REQUEST_TOKEN:
         apirequestToken=getSha256OfStr(str_random(64))
@@ -72,14 +72,19 @@ async def authSqlUser(mail:str,hashedPassword:str)->dict|None:
         return await resetTokens(id)
     else:
         return None
-async def authUserSQLByTokens(apiToken:str,requestToken:str)->dict|None:
+async def checkUserSQLTokensValidity(apiToken:str,requestToken:str)->int|None:
     sql=MySQLClient()
     await sql.connect()
     sqlReq="SELECT `id` FROM `user` WHERE `API_token`='"+apiToken+"' and `API_request_token`='"+requestToken+"';"
     res=await sql.execute(sqlReq)
     await sql.close()
     if len(res)>0:
-        id=res[0]['id']
-        return await resetTokens(id)
+        return res[0]['id']
+    else :
+        return None
+async def authUserSQLByTokens(apiToken:str,requestToken:str)->dict|None:
+    id=await checkUserSQLTokensValidity(apiToken=apiToken,requestToken=requestToken)
+    if id is not None:
+        return await resetTokens(uid= id, tokenTypes=TokenTypes.API_REQUEST_TOKEN)
     else:
         return None
