@@ -50,7 +50,7 @@ async def update_registered_requestCard(
         sqlReq += "`ownerid`=" + str(ownerid) + ","
     if specs is not None:
         sqlReq += (
-            "`power`="
+            "`cardpower`="
             + str(specs.power)
             + ", `name`='"
             + specs.name
