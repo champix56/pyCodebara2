@@ -27,18 +27,18 @@ from codebara.config import (
 #from codebara.seasons.season import seasonLoader
 from codebara.tools.common import build_seed, seededRandom, splitmix64
 from codebara.tools import getSha256FromFile
-from codebara.users import user
+from codebara.users import user_types
 TEST = True
 # from codebara.errors import HttpOutputResponse
 h = hashlib.new('sha256')
 h.update(b"godmdp")
-DEBUG_USERCORE_DATAS = user.UserCoreDatas(-1, 12,h.hexdigest())
+DEBUG_USERCORE_DATAS = user_types.UserCoreDatas(-1, 12,h.hexdigest())
 MIN_WEIGHT: Final[float] = 1e-9
 
 
 class CardGenerator:
     cardId:int
-    userDatas: user.UserCoreDatas
+    userDatas: user_types.UserCoreDatas
     realcb: str
     cb: str
     dateRequest: datetime.datetime
@@ -60,7 +60,7 @@ class CardGenerator:
         self,
         # season: dict | None = None,
         seasons: list[dict],
-        userDatas: user.UserCoreDatas = DEBUG_USERCORE_DATAS,
+        userDatas: user_types.UserCoreDatas = DEBUG_USERCORE_DATAS,
     ):
         print(
             "generator instanciate for user:"
@@ -201,7 +201,7 @@ class CardGenerator:
         finalCode += finalCode[position : position + toAdd]
         self.cb = finalCode
 
-    async def generate(self, cb: str)->int:
+    async def generate(self, cb: str)->dict|int|None:
         print("ean13:" + cb)
         self.realcb = cb
         self.cb = cb
@@ -213,15 +213,15 @@ class CardGenerator:
         self.cardId=self.temporaryId
         self._checkIfImageAlredyExist()
         if not self.isNewImage:
-            await self._createImage()
+            return await self._createImage()
         else:
             # renderPool.push(self._syncCreateCard)
             if TEST is False:
                 t = Thread(target=self._asyncCreateCard)
                 t.start()
+                return self.temporaryId
             else:
-                await self._syncCreateCard()
-        return self.temporaryId
+                return await self._syncCreateCard()
     def _asyncCreateCard(self):
         asyncio.run( self._syncCreateCard())
     async def _createImage(self):
@@ -283,8 +283,15 @@ class CardGenerator:
                 os.remove(folder+'/'+name)
         tar.close()
         os.rmdir(folder)
-        await update_registered_requestCard(specs=self.specs, cardid=self.cardId, hash=getSha256FromFile(zipfilename),fileloc=zipfilename)
-
+        shafile=getSha256FromFile(zipfilename)
+        await update_registered_requestCard(specs=self.specs, cardid=self.cardId, hash=shafile,fileloc=zipfilename)
+        base64_output=''
+        with open(zipfilename, 'rb') as binary_file:
+            binary_file_data = binary_file.read()
+            base64_encoded_data = base64.b64encode(binary_file_data)
+            base64_output = base64_encoded_data.decode('utf-8')
+            return {"card":base64_output,"checksum":shafile,"cardid":self.temporaryId}
+        return None
 
     def _calculate(self):
         # calcul de la saison
@@ -457,13 +464,15 @@ class CardGenerator:
                 + ".png",
                 format="PNG",
             )
-            await self._createImage()
+            return await self._createImage()
         except KeyError as e:
             print("error http")
             print(e)
+            return None
         except ConnectionRefusedError as e:
             print('IA SERVER OFF')
             print(e)
+            return None
         """except Exception as e:
             print(e)"""
         print("request IA")
