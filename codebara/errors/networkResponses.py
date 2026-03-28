@@ -5,6 +5,7 @@ from io import StringIO
 
 class ResponseStatus(Enum):
     OK=200
+    Created=201
     Internal_Server_Error=500
     Not_Found=404
     Bad_Request=400
@@ -16,6 +17,7 @@ class HttpErrors(Enum):
     ERROR_INVALID_METHOD=3
     ERROR_INVALID_ROUTE=4
     ERROR_NOT_IMPLEMENTED_YET=5
+    ERROR_INVALID_TOKEN=6
 
 class  HttpOutputResponse():
     def __init__(self,responseStatus:ResponseStatus|None=None, body:dict|None=None,message:str|None=None):
@@ -40,8 +42,15 @@ class  HttpOutputResponse():
     body:object|str|None
     message:str|None
     ok:bool
-    #def toJson(self):
-    #    return {"ok":self.ok,"status":self.status,"message":self.message,"body":self.body,"statusText":self.statusText}
+    def toResponseTokenized(self, requestToken:str)->web.Response:
+        message:str|None=None if self.body is not None else json.dumps({"message":self.message,"API_REQUEST_TOKEN":requestToken})
+        if self.body is not None:
+            self.body=self.body.__ror__({"API_REQUEST_TOKEN":requestToken})
+            return web.json_response(self.body)
+            #return web.Response( status=self.status, body= json.dumps(self.body)  , headers=())
+        else:
+            return web.Response( status=self.status, text=message   , headers=())
+
     def toResponse(self)->web.Response:
         message:str|None=None if self.body is not None else json.dumps({"message":self.message})
         if self.body is not None:
@@ -61,7 +70,10 @@ def assembleHttpRequestError(error:HttpErrors,request: web.Request, message:str|
         status=ResponseStatus.Bad_Request
         retval.message="Invalid Request with body given for: "+requestPathAndMethod
         retval.body=None
-    # elif error == HttpErrors.ERROR_SERVER:
+    elif error == HttpErrors.ERROR_INVALID_TOKEN:
+        status=ResponseStatus.Bad_Request
+        retval.message="Invalid REQUEST TOKEN"
+        retval.body=None
     else:
         status=ResponseStatus.Not_Found
         retval.message="Invalid Response issue with body given for: "+requestPathAndMethod
