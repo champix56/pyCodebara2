@@ -104,3 +104,20 @@ async def checkCardOwner(uid: int, cid: int) -> str|None:
         return res[0]['fileloc']
     else:
         return None
+async def getSQLCardListOfUser(uid:int)->list:
+    req="SELECT id, cardHash,cardpower,health,attack from card where ownerid="+str(uid)
+    sql = MySQLClient()
+    await sql.connect()
+    res = await sql.execute(req)
+    await sql.close()
+    return res
+async def getSQLCardById(cid:int)->dict|None:
+    req="SELECT id, cardHash,cardpower,health,attack, fileloc from card where id="+str(cid)
+    sql = MySQLClient()
+    await sql.connect()
+    res = await sql.execute(req)
+    await sql.close()
+    if len(res)>0:
+        return res[0]
+    else :
+        return None
