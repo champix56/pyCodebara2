@@ -1,11 +1,15 @@
 import asyncio
-import uvloop
+
 from aiohttp import web 
 import logging
 import logging.handlers
 import queue
 import sys
 from typing import Optional
+try:
+    import uvloop
+except ImportError:
+    uvloop = None
 
 
 from codebara import bodyRoute, noBodyRoute  
@@ -31,8 +35,9 @@ class AsyncHTTPServer:
         self.request_timeout = request_timeout
         self.max_body_size = max_body_size
         self.log_level = log_level
-
-        asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+        if uvloop is not None:
+            asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+        #asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
         self.logger = self._setup_logger()
         self.app = self._create_app()
