@@ -46,7 +46,7 @@ async def resetTokens(uid:int,tokenTypes: TokenTypes=TokenTypes.API_BOTH ):#->di
         sqlReq+="`API_token`='"+apiToken+"' "
         ret['API_TOKEN']=apiToken
     if tokenTypes>2:
-        sqlReq+=' AND '
+        sqlReq+=', '
     if tokenTypes&TokenTypes.API_REQUEST_TOKEN:
         apirequestToken=getSha256OfStr(str_random(64))
         sqlReq+="`API_request_token`='"+apirequestToken+"' "
@@ -64,27 +64,30 @@ async def resetTokens(uid:int,tokenTypes: TokenTypes=TokenTypes.API_BOTH ):#->di
 async def authSqlUser(mail:str,hashedPassword:str)->dict|None:
     sql=MySQLClient()
     await sql.connect()
-    sqlReq = "SELECT (`id`) FROM `user` WHERE `mail`='mail' and `password`='"+hashedPassword+"';"
+    sqlReq = "SELECT `id`, `nickname`, `mail`, `amount`, `hash`  FROM `user` WHERE `mail`='"+mail+"' and `password`='"+hashedPassword+"';"
     res = await sql.execute(sqlReq)
     await sql.close()
     if(len(res)>0):
-        id=res[0]['id']
-        return await resetTokens(id)
+        #id=res[0]['id']
+        #return await resetTokens(id)
+        return res[0]
     else:
         return None
-async def checkUserSQLTokensValidity(apiToken:str,requestToken:str)->int|None:
+async def checkUserSQLTokensValidity(apiToken:str,requestToken:str)->dict|None:
     sql=MySQLClient()
     await sql.connect()
-    sqlReq="SELECT `id` FROM `user` WHERE `API_token`='"+apiToken+"' and `API_request_token`='"+requestToken+"';"
+    sqlReq="SELECT `id`, `nickname`, `mail`, `amount`, `hash` FROM `user` WHERE `API_token`='"+apiToken+"' and `API_request_token`='"+requestToken+"';"
     res=await sql.execute(sqlReq)
     await sql.close()
     if len(res)>0:
-        return res[0]['id']
+        return res[0]
     else :
         return None
 async def authUserSQLByTokens(apiToken:str,requestToken:str)->dict|None:
-    id=await checkUserSQLTokensValidity(apiToken=apiToken,requestToken=requestToken)
-    if id is not None:
-        return await resetTokens(uid= id, tokenTypes=TokenTypes.API_REQUEST_TOKEN)
+    userdata=await checkUserSQLTokensValidity(apiToken=apiToken,requestToken=requestToken)
+    if userdata is not None:
+         #tokens=await resetTokens(uid= userdata['id'], tokenTypes=TokenTypes.API_REQUEST_TOKEN)
+         #return tokens.__ror__(userdata)
+         return userdata
     else:
         return None

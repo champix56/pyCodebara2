@@ -10,12 +10,12 @@ async def createUser(mail:str)->dict|None:
         mailto(mail,'Codebara user :'+str(id)+' password : '+password,'CODEBARA password for user '+mail)
     return apitoken
 async def refreshTokens(uid:int, tokenType:TokenTypes=TokenTypes.API_BOTH):
-    return resetTokens(uid=uid, tokenTypes=tokenType)
+    return await resetTokens(uid=uid, tokenTypes=tokenType)
 async def authUser(mail:str,hashedPass:str)->dict|None:
     return await authSqlUser(mail=mail,hashedPassword=hashedPass)
 async def authUserByTokens(apitoken:str, requesttoken:str)->dict|None:
     return await authUserSQLByTokens(apiToken=apitoken, requestToken=requesttoken)
-async def checkUserTokenValidity(apitoken:str, requesttoken:str)->int|None:
+async def checkUserTokenValidity(apitoken:str, requesttoken:str)->dict|None:
     return await checkUserSQLTokensValidity(apiToken=apitoken,requestToken=requesttoken )
 async def getUserCoreData(uid:int)->UserCoreDatas|None:
     return await getSQLUserCoreDatas(uid)
