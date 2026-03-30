@@ -1,7 +1,7 @@
 from aiohttp import web
 import json
-from codebara.errors import HttpErrors, assembleHttpRequestError, HttpOutputResponse, ResponseStatus
-from codebara.users import authUser, authUserSQLByTokens, createUser
+from codebara.errors import HttpErrors, assembleHttpRequestError, HttpOutputResponse
+from codebara.users import authUser, authUserSQLByTokens, createUser, refreshTokens
 async def userRoutes(request:web.Request,queryArray:tuple,body:dict|None=None)->web.Response:
     try:
         response=assembleHttpRequestError(error=HttpErrors.ERROR_INVALID_METHOD, request=request)
@@ -15,20 +15,22 @@ async def userRoutes(request:web.Request,queryArray:tuple,body:dict|None=None)->
                 else:
                     match pathSplited[2]:
                         case 'auth':
-                            datas=json.loads(request.headers['datas'])
-                            if datas['API_TOKEN'] is not None and datas['API_REQUEST_TOKEN'] is not None:
+                            datas:dict=json.loads(request.headers['datas'])
+                            if datas.get('API_TOKEN') is not None and datas.get('API_REQUEST_TOKEN') is not None:
                                 #auth by token
                                 #response=HttpOutputResponse(responseStatus=ResponseStatus.OK, body={"isChecksumGood":await checkCardIntegrity(cid=datas['cid'], hash=datas['hash'])},message="card is OK")
                                 tokens=await authUserSQLByTokens(datas['API_TOKEN'], datas['API_REQUEST_TOKEN'])
                                 if tokens is not None:
                                     response=HttpOutputResponse(body=tokens)
                                     print('API AUTH')
-                            elif datas['mail'] is not None and datas['pass'] is not None:
+                            elif datas['mail'] is not None and datas['password'] is not None:
                                 #auth by log/pass
                                 print("auth LOG/PASS")
-                                tokens=await authUser(datas['mail'], datas['pass'])
-                                if tokens is not None:
-                                    response=HttpOutputResponse(body=tokens)
+                                userDatas=await authUser(datas['mail'], datas['password'])
+                                if userDatas is not None:
+                                    tokens:dict|None=await refreshTokens(uid= userDatas['id'])
+                                    if tokens is not None:
+                                        response=HttpOutputResponse(body=tokens.__ror__(userDatas))
                                 
             case ('POST'):
                 if request.path=='/user':
@@ -43,4 +45,4 @@ async def userRoutes(request:web.Request,queryArray:tuple,body:dict|None=None)->
         return  response.toResponse()
     except Exception as e:
         print(e)
-        return assembleHttpRequestError(error=HttpErrors.ERROR_REQUEST, request=request)
+        return assembleHttpRequestError(error=HttpErrors.ERROR_REQUEST, request=request).toResponse()
