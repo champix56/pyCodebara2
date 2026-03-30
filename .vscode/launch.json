@@ -14,6 +14,16 @@
       "console": "integratedTerminal",
       "justMyCode": true
     },
+     {
+      "name": "WIN Python: Debug (venv)",
+      "type": "debugpy",
+      "request": "launch",
+      //"program": "${file}",
+      "program": "main.py",
+      "python": "${workspaceFolder}\\venv\\bin\\python.exe",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
     {
       "name": "Python: genSeason",
       "type": "debugpy",
