@@ -1,5 +1,5 @@
 import json
-from io import TextIOWrapper
+#from io import TextIOWrapper
 #from codebara.cards.cardMysql import check_cardHash
 class SpecialSpec:
     name:str
@@ -69,4 +69,3 @@ class Card (CardSpecs):
         return json.dumps(self.__dict__)
     def toCardSpecs(self):
         return super().toJson()
-
