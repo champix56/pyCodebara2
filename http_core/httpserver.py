@@ -89,7 +89,8 @@ class AsyncHTTPServer:
     # ======================================================
     # HANDLERS HTTP
     # ======================================================
-
+    async def handle_options(self, request: web.Request) -> web.Response:
+        return web.Response(status=200)
     async def handle_get(self, request: web.Request) -> web.Response:
         #await asyncio.sleep(20)  # > REQUEST_TIMEOUT
         self.logger.info(
@@ -137,14 +138,14 @@ class AsyncHTTPServer:
 
     def _create_app(self) -> web.Application:
         app = web.Application(
-            middlewares=[self.timeout_middleware, cors_middleware(  origins=["http://localhost:5173"],
-                                                                    allow_methods=("POST", "PATCH","PUT", "DELETE", "GET"),
-                                                                    allow_headers=DEFAULT_ALLOW_HEADERS+ ("email","token")
+            middlewares=[self.timeout_middleware, cors_middleware(  origins=["http://localhost:8081","http://localhost:5173"],
+                                                                    allow_methods=("POST", "PATCH","PUT", "DELETE", "GET","OPTIONS"),
+                                                                    allow_headers=DEFAULT_ALLOW_HEADERS+ ("email","token","datas")
                                                                   )
                                                                   ],
             client_max_size=self.max_body_size
         )
-
+        app.router.add_options("/{path:.*}", self.handle_options)
         app.router.add_get("/{path:.*}", self.handle_get)
         app.router.add_post("/{path:.*}", self.handle_with_body)
         app.router.add_put("/{path:.*}", self.handle_with_body)
@@ -178,7 +179,7 @@ class AsyncHTTPServer:
         sys.exit(0)
 
     def getQueryValue(self,request :web.Request):
-        values={}
+        values:dict={}
         if len(request.query_string)==0:
             return values
         qs=str(request.query_string)
