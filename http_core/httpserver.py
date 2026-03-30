@@ -175,7 +175,7 @@ class AsyncHTTPServer:
             self.app,
             host=self.host,
             port=self.port,
-            reuse_port=True,
+            reuse_port=(sys.platform != "win32"),
             access_log=None
         )
 
