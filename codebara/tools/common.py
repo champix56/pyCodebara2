@@ -4,6 +4,7 @@ import hashlib
 from typing import Final
 import string
 import random
+import base64
 def str_random(size=6, chars=string.ascii_uppercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
 def getSha256OfStr(strToHash:str)->str:
@@ -64,3 +65,13 @@ def build_seed(seed_user: int, season_seed: int, cb_field_input: int) -> int:
     x ^= season_seed << 21
     x ^= cb_field_input << 42
     return splitmix64(x)
+
+
+
+def getBase64OfFile(fileLoc:str, encoding:str='utf-8')->str|None:
+    base64_output=''
+    with open(fileLoc, 'rb') as binary_file:
+        binary_file_data = binary_file.read()
+        base64_encoded_data = base64.b64encode(binary_file_data)
+        base64_output = base64_encoded_data.decode(encoding)
+    return base64_output if len(base64_output)>10 else None
